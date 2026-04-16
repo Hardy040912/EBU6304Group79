@@ -311,6 +311,28 @@
     </header>
 
     <div class="container">
+        <!-- Quick Actions -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <a href="<%= request.getContextPath() %>/mo-post-job.jsp" style="text-decoration: none;">
+                <div class="card" style="cursor: pointer; transition: transform 0.15s;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">➕</div>
+                        <div style="font-weight: 600; color: #111827;">Post New Job</div>
+                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Create TA position</div>
+                    </div>
+                </div>
+            </a>
+            <a href="<%= request.getContextPath() %>/mo-applications.jsp" style="text-decoration: none;">
+                <div class="card" style="cursor: pointer; transition: transform 0.15s;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">👥</div>
+                        <div style="font-weight: 600; color: #111827;">View Applications</div>
+                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Review applicants</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
         <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="card">

@@ -1,0 +1,6 @@
+# 格式: email|password|role|name
+alice.chen@bupt.edu.cn|123456|student|Alice Chen
+dr.smith@bupt.edu.cn|123456|module-organiser|Dr. Smith
+admin@bupt.edu.cn|123456|admin|Administrator
+test@bupt.edu.cn|123|student|hh hh
+aaa@bupt.edu.cn|123456|student|aa aa

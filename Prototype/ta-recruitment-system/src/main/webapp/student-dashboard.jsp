@@ -317,12 +317,43 @@
             </div>
         </div>
 
+        <!-- Quick Actions -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            <a href="<%= request.getContextPath() %>/student-jobs.jsp" style="text-decoration: none;">
+                <div class="card" style="cursor: pointer; transition: transform 0.15s;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
+                        <div style="font-weight: 600; color: #111827;">Browse Jobs</div>
+                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">View available positions</div>
+                    </div>
+                </div>
+            </a>
+            <a href="<%= request.getContextPath() %>/student-applications.jsp" style="text-decoration: none;">
+                <div class="card" style="cursor: pointer; transition: transform 0.15s;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
+                        <div style="font-weight: 600; color: #111827;">My Applications</div>
+                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Track application status</div>
+                    </div>
+                </div>
+            </a>
+            <a href="<%= request.getContextPath() %>/student-profile.jsp" style="text-decoration: none;">
+                <div class="card" style="cursor: pointer; transition: transform 0.15s;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">👤</div>
+                        <div style="font-weight: 600; color: #111827;">Profile & CV</div>
+                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Update your profile</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
         <!-- Tabs -->
         <div class="tabs">
             <div class="tab-list">
-                <button class="tab-button active" onclick="switchTab('browse')">Browse Jobs</button>
-                <button class="tab-button" onclick="switchTab('applications')">My Applications</button>
-                <button class="tab-button" onclick="switchTab('profile')">Profile & CV</button>
+                <button class="tab-button active" onclick="switchTab('browse')">Recent Jobs</button>
+                <button class="tab-button" onclick="switchTab('applications')">Recent Applications</button>
+                <button class="tab-button" onclick="switchTab('profile')">Profile Summary</button>
             </div>
 
             <!-- Browse Jobs Tab -->

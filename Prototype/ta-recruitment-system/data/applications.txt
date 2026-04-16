@@ -1,0 +1,5 @@
+# 格式: appId|jobId|studentEmail|studentName|coverLetter|status|applyDate
+a1|j1|alice.chen@bupt.edu.cn|Alice Chen|I am interested in this position|pending|2024-03-20
+1776235468107_9913|j1|test@bupt.edu.cn|hh hh|test|accepted|2026-04-15
+1776307905359_988|1776262062257_7618|aaa@bupt.edu.cn|aa aa|test|accepted|2026-04-16
+1776308268059_2178|1776308161574_1493|dr.smith@bupt.edu.cn|Dr. Smith|sss|rejected|2026-04-16
