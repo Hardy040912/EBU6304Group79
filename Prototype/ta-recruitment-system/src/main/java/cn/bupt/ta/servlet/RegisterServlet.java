@@ -1,5 +1,6 @@
 package cn.bupt.ta.servlet;
 
+import cn.bupt.ta.util.DataFileUtil;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -10,26 +11,36 @@ import java.io.IOException;
 
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
-    
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
+        // 初始化数据目录
+        DataFileUtil.initDataDir(getServletContext().getRealPath("/"));
+
+        request.setCharacterEncoding("UTF-8");
+
         String firstName = request.getParameter("firstName");
         String lastName = request.getParameter("lastName");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
         String role = request.getParameter("role");
-        
-        // 简单验证（迭代2不做复杂验证）
+
+        // 简单验证
         if (password != null && password.equals(confirmPassword)) {
+            // 保存到文件
+            String fullName = firstName + " " + lastName;
+            String userLine = email + "|" + password + "|" + role + "|" + fullName;
+            DataFileUtil.appendLine("users.txt", userLine);
+
             // 注册成功，直接登录并跳转
             HttpSession session = request.getSession();
             session.setAttribute("userEmail", email);
-            session.setAttribute("userName", firstName + " " + lastName);
+            session.setAttribute("userName", fullName);
             session.setAttribute("userRole", role);
-            
+
             // 根据角色跳转到对应的Dashboard
             if ("student".equals(role)) {
                 response.sendRedirect(request.getContextPath() + "/student-dashboard.jsp");
@@ -45,9 +56,9 @@ public class RegisterServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/register.jsp?error=password");
         }
     }
-    
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.sendRedirect(request.getContextPath() + "/register.jsp");
     }

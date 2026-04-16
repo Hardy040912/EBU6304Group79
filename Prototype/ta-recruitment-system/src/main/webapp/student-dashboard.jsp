@@ -1,4 +1,60 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="cn.bupt.ta.util.DataFileUtil" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.Map" %>
+<%
+    String userEmail = (String) session.getAttribute("userEmail");
+    String userName = (String) session.getAttribute("userName");
+    if (userEmail == null) {
+        response.sendRedirect(request.getContextPath() + "/index.jsp");
+        return;
+    }
+
+    // 初始化数据目录
+    DataFileUtil.initDataDir(application.getRealPath("/"));
+
+    // 计算当前工作量
+    List<String> applications = DataFileUtil.readLines("applications.txt");
+    List<String> jobs = DataFileUtil.readLines("jobs.txt");
+
+    Map<String, String[]> jobMap = new HashMap<>();
+    for (String line : jobs) {
+        String[] parts = line.split("\\|");
+        if (parts.length >= 11) {
+            jobMap.put(parts[0], parts);
+        }
+    }
+
+    int totalHours = 0;
+    int activeApplications = 0;
+    int pendingApplications = 0;
+
+    for (String line : applications) {
+        String[] parts = line.split("\\|");
+        if (parts.length >= 7 && parts[2].equals(userEmail)) {
+            activeApplications++;
+            if ("pending".equals(parts[5])) {
+                pendingApplications++;
+            } else if ("accepted".equals(parts[5])) {
+                String[] jobInfo = jobMap.get(parts[1]);
+                if (jobInfo != null && jobInfo.length >= 9) {
+                    try {
+                        totalHours += Integer.parseInt(jobInfo[8].trim());
+                    } catch (NumberFormatException e) {
+                        // 忽略解析错误
+                    }
+                }
+            }
+        }
+    }
+
+    int maxHours = 20; // 固定为 20h
+    int availableHours = maxHours - totalHours;
+    if (availableHours < 0) availableHours = 0; // 如果超过，显示 0
+    int workloadPercentage = maxHours > 0 ? (totalHours * 100) / maxHours : 0;
+    boolean isOverloaded = totalHours > maxHours; // 是否超载
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -245,9 +301,10 @@
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
-            margin-top: 1rem;
+            text-decoration: none;
+            display: inline-block;
         }
-        
+
         .btn-apply:hover {
             background: #1d4ed8;
         }
@@ -271,7 +328,7 @@
         <div class="header-content">
             <div class="header-title">
                 <h1>Student Dashboard</h1>
-                <p>Welcome, Alice Chen</p>
+                <p>Welcome, <%= userName %></p>
             </div>
             <a href="<%= request.getContextPath() %>/logout" class="btn-logout">
                 <span>🚪</span> Logout
@@ -287,11 +344,19 @@
                     <span class="card-title">Current Workload</span>
                     <span class="card-icon">💼</span>
                 </div>
-                <div class="card-value">12h / 20h</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 60%"></div>
+                <div class="card-value" style="<%= totalHours > maxHours ? "color: #ef4444;" : "" %>">
+                    <%= totalHours %>h / <%= maxHours %>h
                 </div>
-                <p class="card-description">8h available</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: <%= Math.min(workloadPercentage, 100) %>%; <%= totalHours > maxHours ? "background: #ef4444;" : "" %>"></div>
+                </div>
+                <p class="card-description" style="<%= totalHours > maxHours ? "color: #ef4444; font-weight: 600;" : "" %>">
+                    <% if (totalHours > maxHours) { %>
+                        ⚠️ Exceeded maximum by <%= totalHours - maxHours %>h
+                    <% } else { %>
+                        <%= availableHours %>h available
+                    <% } %>
+                </p>
             </div>
 
             <div class="card">
@@ -299,8 +364,8 @@
                     <span class="card-title">Active Applications</span>
                     <span class="card-icon">📄</span>
                 </div>
-                <div class="card-value">3</div>
-                <p class="card-description">2 pending review</p>
+                <div class="card-value"><%= activeApplications %></div>
+                <p class="card-description"><%= pendingApplications %> pending review</p>
             </div>
 
             <div class="card">
@@ -335,89 +400,57 @@
                         Jobs ranked by skill compatibility using AI matching algorithm
                     </p>
 
+                    <%
+                        List<String> allJobs = DataFileUtil.readLines("jobs.txt");
+                        if (allJobs.isEmpty()) {
+                    %>
+                        <p style="color: #6b7280; text-align: center; padding: 2rem;">No jobs available at the moment.</p>
+                    <%
+                        } else {
+                            for (String line : allJobs) {
+                                String[] parts = line.split("\\|");
+                                if (parts.length >= 11 && "open".equals(parts[10])) {
+                                    String jobId = parts[0];
+                                    String title = parts[1];
+                                    String moduleCode = parts[2];
+                                    String moduleName = parts[3];
+                                    String organiser = parts[4];
+                                    String description = parts[6];
+                                    String skills = parts[7];
+                                    String hoursPerWeek = parts[8];
+                                    String duration = parts[9];
+                    %>
                     <div class="job-card">
                         <div class="job-header">
                             <div style="flex: 1;">
-                                <h3 class="job-title">
-                                    Machine Learning Lab Assistant
-                                    <span class="top-match-badge">✨ Top Match</span>
-                                </h3>
-                                <p class="job-subtitle">CS401 - Introduction to Machine Learning | Dr. Smith</p>
-                            </div>
-                            <div class="match-score">
-                                <div class="match-score-value">71%</div>
-                                <p class="match-score-label">Match Score</p>
+                                <h3 class="job-title"><%= title %></h3>
+                                <p class="job-subtitle"><%= moduleCode %> - <%= moduleName %> | <%= organiser %></p>
                             </div>
                         </div>
-                        <p class="job-description">
-                            Assist students with ML lab exercises, help debug Python code, and support with assignment grading.
-                        </p>
+                        <p class="job-description"><%= description %></p>
                         <div>
-                            <span class="badge">Python</span>
-                            <span class="badge">Machine Learning</span>
-                            <span class="badge">Teaching</span>
+                            <%
+                                String[] skillList = skills.split(",");
+                                for (String skill : skillList) {
+                            %>
+                            <span class="badge"><%= skill.trim() %></span>
+                            <%
+                                }
+                            %>
                         </div>
-                        <div class="job-details">
-                            <span>⏰ 8h/week</span>
-                            <span>📅 12 weeks</span>
-                            <span>📌 Posted: 2026-03-15</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                            <div class="job-details" style="margin: 0;">
+                                <span>⏰ <%= hoursPerWeek %>h/week</span>
+                                <span>📅 <%= duration %></span>
+                            </div>
+                            <a href="<%= request.getContextPath() %>/student-apply.jsp?jobId=<%= jobId %>" class="btn-apply">Apply Now</a>
                         </div>
-                        <button class="btn-apply">Apply Now</button>
                     </div>
-
-                    <div class="job-card">
-                        <div class="job-header">
-                            <div style="flex: 1;">
-                                <h3 class="job-title">Web Development Tutor</h3>
-                                <p class="job-subtitle">CS302 - Web Technologies | Prof. Johnson</p>
-                            </div>
-                            <div class="match-score">
-                                <div class="match-score-value">39%</div>
-                                <p class="match-score-label">Match Score</p>
-                            </div>
-                        </div>
-                        <p class="job-description">
-                            Support students with React and Node.js projects, conduct tutorial sessions.
-                        </p>
-                        <div>
-                            <span class="badge">JavaScript</span>
-                            <span class="badge">React</span>
-                            <span class="badge">Web Development</span>
-                        </div>
-                        <div class="job-details">
-                            <span>⏰ 10h/week</span>
-                            <span>📅 16 weeks</span>
-                            <span>📌 Posted: 2026-03-14</span>
-                        </div>
-                        <button class="btn-apply">Apply Now</button>
-                    </div>
-
-                    <div class="job-card">
-                        <div class="job-header">
-                            <div style="flex: 1;">
-                                <h3 class="job-title">Data Structures TA</h3>
-                                <p class="job-subtitle">CS201 - Data Structures & Algorithms | Dr. Brown</p>
-                            </div>
-                            <div class="match-score">
-                                <div class="match-score-value">39%</div>
-                                <p class="match-score-label">Match Score</p>
-                            </div>
-                        </div>
-                        <p class="job-description">
-                            Help students understand complex algorithms, grade assignments, and hold office hours.
-                        </p>
-                        <div>
-                            <span class="badge">C++</span>
-                            <span class="badge">Data Structures</span>
-                            <span class="badge">Algorithms</span>
-                        </div>
-                        <div class="job-details">
-                            <span>⏰ 12h/week</span>
-                            <span>📅 14 weeks</span>
-                            <span>📌 Posted: 2026-03-13</span>
-                        </div>
-                        <button class="btn-apply">Apply Now</button>
-                    </div>
+                    <%
+                                }
+                            }
+                        }
+                    %>
                 </div>
             </div>
 
@@ -425,45 +458,61 @@
             <div id="applications" class="tab-content">
                 <div class="card">
                     <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">My Applications</h2>
-                    
-                    <div class="job-card">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div>
-                                <h3 class="job-title">Machine Learning Lab Assistant</h3>
-                                <p class="job-subtitle">CS401 - Introduction to Machine Learning</p>
-                                <div class="job-details" style="margin-top: 0.5rem;">
-                                    <span>Applied: 2026-03-16</span>
-                                </div>
-                            </div>
-                            <span class="badge" style="background: #fef3c7; color: #92400e;">⏰ Pending</span>
-                        </div>
-                    </div>
 
-                    <div class="job-card">
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div>
-                                <h3 class="job-title">Web Development Tutor</h3>
-                                <p class="job-subtitle">CS302 - Web Technologies</p>
-                                <div class="job-details" style="margin-top: 0.5rem;">
-                                    <span>Applied: 2026-03-15</span>
-                                </div>
-                            </div>
-                            <span class="badge" style="background: #dcfce7; color: #166534;">✓ Accepted</span>
-                        </div>
-                    </div>
+                    <%
+                        boolean hasApps = false;
+                        for (String line : applications) {
+                            String[] parts = line.split("\\|");
+                            if (parts.length >= 7 && parts[2].equals(userEmail)) {
+                                hasApps = true;
+                                String appId = parts[0];
+                                String jobId = parts[1];
+                                String coverLetter = parts[4];
+                                String status = parts[5];
+                                String applyDate = parts[6];
 
+                                String[] jobInfo = jobMap.get(jobId);
+                                String jobTitle = jobInfo != null ? jobInfo[1] : "Unknown Job";
+                                String moduleCode = jobInfo != null ? jobInfo[2] : "";
+                                String moduleName = jobInfo != null ? jobInfo[3] : "";
+
+                                String statusBadge = "background: #fef3c7; color: #92400e;";
+                                String statusIcon = "⏰";
+                                String statusText = "Pending";
+
+                                if ("accepted".equals(status)) {
+                                    statusBadge = "background: #dcfce7; color: #166534;";
+                                    statusIcon = "✓";
+                                    statusText = "Accepted";
+                                } else if ("rejected".equals(status)) {
+                                    statusBadge = "background: #fee2e2; color: #991b1b;";
+                                    statusIcon = "✗";
+                                    statusText = "Rejected";
+                                }
+                    %>
                     <div class="job-card">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div>
-                                <h3 class="job-title">Statistics Lab Assistant</h3>
-                                <p class="job-subtitle">MATH305 - Applied Statistics</p>
+                                <h3 class="job-title"><%= jobTitle %></h3>
+                                <p class="job-subtitle"><%= moduleCode %> - <%= moduleName %></p>
                                 <div class="job-details" style="margin-top: 0.5rem;">
-                                    <span>Applied: 2026-03-14</span>
+                                    <span>Applied: <%= applyDate %></span>
                                 </div>
                             </div>
-                            <span class="badge" style="background: #fef3c7; color: #92400e;">⏰ Pending</span>
+                            <span class="badge" style="<%= statusBadge %>"><%= statusIcon %> <%= statusText %></span>
                         </div>
                     </div>
+                    <%
+                            }
+                        }
+                        if (!hasApps) {
+                    %>
+                    <p style="color: #6b7280; text-align: center; padding: 2rem;">
+                        You haven't submitted any applications yet.
+                    </p>
+                    <%
+                        }
+                    %>
                 </div>
             </div>
 
@@ -473,9 +522,9 @@
                     <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">Profile & CV</h2>
                     <div style="margin-bottom: 1.5rem;">
                         <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Personal Information</h3>
-                        <p style="color: #6b7280; font-size: 0.875rem;">Name: Alice Chen</p>
-                        <p style="color: #6b7280; font-size: 0.875rem;">Email: alice.chen@bupt.edu.cn</p>
-                        <p style="color: #6b7280; font-size: 0.875rem;">Max Hours: 20h/week</p>
+                        <p style="color: #6b7280; font-size: 0.875rem;">Name: <%= userName %></p>
+                        <p style="color: #6b7280; font-size: 0.875rem;">Email: <%= userEmail %></p>
+                        <p style="color: #6b7280; font-size: 0.875rem;">Max Hours: <%= maxHours %>h/week</p>
                     </div>
                     <div>
                         <h3 style="font-size: 1rem; margin-bottom: 0.5rem;">Skills</h3>
@@ -483,6 +532,9 @@
                         <span class="badge">JavaScript</span>
                         <span class="badge">Machine Learning</span>
                         <span class="badge">Data Analysis</span>
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <a href="<%= request.getContextPath() %>/student-profile.jsp" class="btn-apply">Edit Profile & Upload CV</a>
                     </div>
                 </div>
             </div>

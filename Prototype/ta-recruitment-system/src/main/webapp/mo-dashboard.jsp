@@ -1,4 +1,51 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="cn.bupt.ta.util.DataFileUtil" %>
+<%@ page import="java.util.List" %>
+<%
+    String userEmail = (String) session.getAttribute("userEmail");
+    String userName = (String) session.getAttribute("userName");
+    if (userEmail == null) {
+        response.sendRedirect(request.getContextPath() + "/index.jsp");
+        return;
+    }
+
+    // 初始化数据目录
+    DataFileUtil.initDataDir(application.getRealPath("/"));
+
+    // 统计数据
+    List<String> jobs = DataFileUtil.readLines("jobs.txt");
+    List<String> applications = DataFileUtil.readLines("applications.txt");
+
+    int activeJobs = 0;
+    int pendingApps = 0;
+    int acceptedTAs = 0;
+
+    for (String line : jobs) {
+        String[] parts = line.split("\\|");
+        if (parts.length >= 11 && parts[5].equals(userEmail) && "open".equals(parts[10])) {
+            activeJobs++;
+        }
+    }
+
+    for (String line : applications) {
+        String[] parts = line.split("\\|");
+        if (parts.length >= 7) {
+            String jobId = parts[1];
+            // 检查是否是该 MO 的岗位
+            for (String jobLine : jobs) {
+                String[] jobParts = jobLine.split("\\|");
+                if (jobParts.length >= 11 && jobParts[0].equals(jobId) && jobParts[5].equals(userEmail)) {
+                    if ("pending".equals(parts[5])) {
+                        pendingApps++;
+                    } else if ("accepted".equals(parts[5])) {
+                        acceptedTAs++;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -302,7 +349,7 @@
         <div class="header-content">
             <div class="header-title">
                 <h1>Module Organiser Dashboard</h1>
-                <p>Dr. Smith</p>
+                <p><%= userName %></p>
             </div>
             <a href="<%= request.getContextPath() %>/logout" class="btn-logout">
                 <span>🚪</span> Logout
@@ -318,8 +365,8 @@
                     <span class="card-title">Active Job Posts</span>
                     <span class="card-icon">💼</span>
                 </div>
-                <div class="card-value">2</div>
-                <p class="card-description">0 closed positions</p>
+                <div class="card-value"><%= activeJobs %></div>
+                <p class="card-description">Open positions</p>
             </div>
 
             <div class="card">
@@ -327,7 +374,7 @@
                     <span class="card-title">Pending Applications</span>
                     <span class="card-icon">👥</span>
                 </div>
-                <div class="card-value">2</div>
+                <div class="card-value"><%= pendingApps %></div>
                 <p class="card-description">Awaiting your review</p>
             </div>
 
@@ -336,7 +383,7 @@
                     <span class="card-title">Accepted TAs</span>
                     <span class="card-icon">✓</span>
                 </div>
-                <div class="card-value">1</div>
+                <div class="card-value"><%= acceptedTAs %></div>
                 <p class="card-description">Currently hired</p>
             </div>
         </div>
@@ -350,142 +397,182 @@
 
             <!-- My Job Posts Tab -->
             <div id="jobs" class="tab-content active">
-                <button class="btn-create">
+                <a href="<%= request.getContextPath() %>/mo-post-job.jsp" class="btn-create" style="text-decoration: none;">
                     <span>+</span> Create New Job Post
-                </button>
+                </a>
 
                 <div class="card">
-                    <div class="job-card">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                            <div>
-                                <h3 class="job-title">Machine Learning Lab Assistant</h3>
-                                <p class="job-subtitle">CS401 - Introduction to Machine Learning</p>
-                            </div>
-                            <span class="badge-status badge-open">Open</span>
-                        </div>
-                        <p style="color: #4b5563; font-size: 0.875rem; margin-bottom: 1rem;">
-                            Assist students with ML lab exercises, help debug Python code, and support with assignment grading.
-                        </p>
-                        <div style="margin-bottom: 1rem;">
-                            <span class="badge">Python</span>
-                            <span class="badge">Machine Learning</span>
-                            <span class="badge">Teaching</span>
-                        </div>
-                        <div style="display: flex; gap: 1.5rem; font-size: 0.875rem; color: #6b7280;">
-                            <span>⏰ 8h/week</span>
-                            <span>📅 12 weeks</span>
-                            <span>📊 2 applicants</span>
-                        </div>
-                    </div>
+                    <%
+                        List<String> myJobs = DataFileUtil.readLines("jobs.txt");
+                        boolean hasJobs = false;
 
+                        for (String line : myJobs) {
+                            String[] parts = line.split("\\|");
+                            if (parts.length >= 11 && parts[5].equals(userEmail)) {
+                                hasJobs = true;
+                                String jobId = parts[0];
+                                String title = parts[1];
+                                String moduleCode = parts[2];
+                                String moduleName = parts[3];
+                                String description = parts[6];
+                                String skills = parts[7];
+                                String hoursPerWeek = parts[8];
+                                String duration = parts[9];
+                                String status = parts[10];
+
+                                // 统计该岗位的申请数
+                                int applicantCount = 0;
+                                for (String appLine : applications) {
+                                    String[] appParts = appLine.split("\\|");
+                                    if (appParts.length >= 7 && appParts[1].equals(jobId)) {
+                                        applicantCount++;
+                                    }
+                                }
+
+                                String statusBadge = "badge-open";
+                                String statusText = "Open";
+                                if ("closed".equals(status)) {
+                                    statusBadge = "badge-closed";
+                                    statusText = "Closed";
+                                }
+                    %>
                     <div class="job-card">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
                             <div>
-                                <h3 class="job-title">Data Structures TA</h3>
-                                <p class="job-subtitle">CS201 - Data Structures & Algorithms</p>
+                                <h3 class="job-title"><%= title %></h3>
+                                <p class="job-subtitle"><%= moduleCode %> - <%= moduleName %></p>
                             </div>
-                            <span class="badge-status badge-open">Open</span>
+                            <span class="badge-status <%= statusBadge %>"><%= statusText %></span>
                         </div>
                         <p style="color: #4b5563; font-size: 0.875rem; margin-bottom: 1rem;">
-                            Help students understand complex algorithms, grade assignments, and hold office hours.
+                            <%= description %>
                         </p>
                         <div style="margin-bottom: 1rem;">
-                            <span class="badge">C++</span>
-                            <span class="badge">Data Structures</span>
-                            <span class="badge">Algorithms</span>
+                            <%
+                                String[] skillList = skills.split(",");
+                                for (String skill : skillList) {
+                            %>
+                            <span class="badge"><%= skill.trim() %></span>
+                            <%
+                                }
+                            %>
                         </div>
                         <div style="display: flex; gap: 1.5rem; font-size: 0.875rem; color: #6b7280;">
-                            <span>⏰ 12h/week</span>
-                            <span>📅 14 weeks</span>
-                            <span>📊 1 applicant</span>
+                            <span>⏰ <%= hoursPerWeek %>h/week</span>
+                            <span>📅 <%= duration %></span>
+                            <span>📊 <%= applicantCount %> applicant<%= applicantCount != 1 ? "s" : "" %></span>
                         </div>
                     </div>
+                    <%
+                            }
+                        }
+
+                        if (!hasJobs) {
+                    %>
+                    <p style="color: #6b7280; text-align: center; padding: 2rem;">
+                        You haven't posted any jobs yet. Click "Create New Job Post" to get started.
+                    </p>
+                    <%
+                        }
+                    %>
                 </div>
             </div>
 
             <!-- Applications Tab -->
             <div id="applications" class="tab-content">
+                <a href="<%= request.getContextPath() %>/mo-applications.jsp" class="btn-create" style="text-decoration: none; margin-bottom: 1rem; display: inline-block;">
+                    View All Applications
+                </a>
+
                 <div class="card">
-                    <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">Applications for Machine Learning Lab Assistant</h2>
-                    
-                    <div class="applicant-card">
-                        <div class="applicant-header">
-                            <div>
-                                <div class="applicant-name">Alice Chen</div>
-                                <div class="applicant-email">alice.chen@bupt.edu.cn</div>
-                            </div>
-                            <div class="match-score">
-                                <div class="match-score-value">71%</div>
-                                <div class="match-score-label">Match</div>
-                            </div>
-                        </div>
-                        <div style="margin: 0.75rem 0;">
-                            <span class="badge">Python</span>
-                            <span class="badge">JavaScript</span>
-                            <span class="badge">Machine Learning</span>
-                            <span class="badge">Data Analysis</span>
-                        </div>
-                        <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem;">
-                            Current workload: 12h/20h | Available: 8h
-                        </div>
-                        <div class="btn-group">
-                            <button class="btn-accept">✓ Accept</button>
-                            <button class="btn-reject">✗ Reject</button>
-                        </div>
-                    </div>
+                    <%
+                        // 按岗位分组显示申请
+                        boolean hasAnyApplications = false;
 
-                    <div class="applicant-card">
-                        <div class="applicant-header">
-                            <div>
-                                <div class="applicant-name">David Zhang</div>
-                                <div class="applicant-email">david.zhang@bupt.edu.cn</div>
-                            </div>
-                            <div class="match-score">
-                                <div class="match-score-value">39%</div>
-                                <div class="match-score-label">Match</div>
-                            </div>
-                        </div>
-                        <div style="margin: 0.75rem 0;">
-                            <span class="badge">Python</span>
-                            <span class="badge">Statistics</span>
-                            <span class="badge">Research</span>
-                            <span class="badge">MATLAB</span>
-                        </div>
-                        <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem;">
-                            Current workload: 18h/18h | Available: 0h
-                        </div>
-                        <div class="btn-group">
-                            <button class="btn-accept">✓ Accept</button>
-                            <button class="btn-reject">✗ Reject</button>
-                        </div>
-                    </div>
+                        for (String line : myJobs) {
+                            String[] parts = line.split("\\|");
+                            if (parts.length >= 11 && parts[5].equals(userEmail)) {
+                                String jobId = parts[0];
+                                String jobTitle = parts[1];
+                                String moduleCode = parts[2];
 
-                    <h2 style="font-size: 1.25rem; margin: 2rem 0 1rem;">Applications for Data Structures TA</h2>
-                    
+                                // 获取该岗位的申请
+                                List<String[]> jobApps = new java.util.ArrayList<>();
+                                for (String appLine : applications) {
+                                    String[] appParts = appLine.split("\\|");
+                                    if (appParts.length >= 7 && appParts[1].equals(jobId)) {
+                                        jobApps.add(appParts);
+                                    }
+                                }
+
+                                if (!jobApps.isEmpty()) {
+                                    hasAnyApplications = true;
+                    %>
+                    <h2 style="font-size: 1.25rem; margin-bottom: 1rem; <%= hasAnyApplications && !jobApps.isEmpty() ? "margin-top: 2rem;" : "" %>">
+                        Applications for <%= jobTitle %> (<%= moduleCode %>)
+                    </h2>
+
+                    <%
+                                    for (String[] app : jobApps) {
+                                        String appId = app[0];
+                                        String studentEmail = app[2];
+                                        String studentName = app[3];
+                                        String coverLetter = app[4];
+                                        String status = app[5];
+                                        String applyDate = app[6];
+                    %>
                     <div class="applicant-card">
                         <div class="applicant-header">
                             <div>
-                                <div class="applicant-name">Carol Li</div>
-                                <div class="applicant-email">carol.li@bupt.edu.cn</div>
+                                <div class="applicant-name"><%= studentName %></div>
+                                <div class="applicant-email"><%= studentEmail %></div>
+                                <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem;">Applied: <%= applyDate %></div>
                             </div>
-                            <div class="match-score">
-                                <div class="match-score-value">100%</div>
-                                <div class="match-score-label">Match</div>
-                            </div>
+                            <% if ("pending".equals(status)) { %>
+                            <span class="badge" style="background: #fef3c7; color: #92400e;">⏰ Pending</span>
+                            <% } else if ("accepted".equals(status)) { %>
+                            <span class="badge" style="background: #dcfce7; color: #166534;">✓ Accepted</span>
+                            <% } else if ("rejected".equals(status)) { %>
+                            <span class="badge" style="background: #fee2e2; color: #991b1b;">✗ Rejected</span>
+                            <% } %>
                         </div>
-                        <div style="margin: 0.75rem 0;">
-                            <span class="badge">C++</span>
-                            <span class="badge">Data Structures</span>
-                            <span class="badge">Algorithms</span>
-                            <span class="badge">Teaching</span>
+                        <div style="margin: 0.75rem 0; font-size: 0.875rem; color: #4b5563;">
+                            <strong>Cover Letter:</strong> <%= coverLetter %>
                         </div>
-                        <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem;">
-                            Current workload: 8h/20h | Available: 12h
+                        <% if ("pending".equals(status)) { %>
+                        <div class="btn-group">
+                            <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline;">
+                                <input type="hidden" name="appId" value="<%= appId %>">
+                                <input type="hidden" name="status" value="accepted">
+                                <button type="submit" class="btn-accept">✓ Accept</button>
+                            </form>
+                            <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline-block; margin-left: 0.5rem;" id="rejectFormDash_<%= appId %>">
+                                <input type="hidden" name="appId" value="<%= appId %>">
+                                <input type="hidden" name="status" value="rejected">
+                                <input type="hidden" name="blocked" id="blockedInputDash_<%= appId %>" value="false">
+                                <button type="submit" class="btn-reject">✗ Reject</button>
+                                <label style="display: inline-block; margin-left: 0.5rem; font-size: 0.875rem; color: #4b5563; cursor: pointer;">
+                                    <input type="checkbox" id="blockCheckboxDash_<%= appId %>" onchange="document.getElementById('blockedInputDash_<%= appId %>').value = this.checked ? 'true' : 'false';" style="margin-right: 0.25rem;">
+                                    Block student from reapplying
+                                </label>
+                            </form>
                         </div>
-                        <div style="margin-top: 0.75rem;">
-                            <span class="badge-status badge-accepted">✓ Accepted</span>
-                        </div>
+                        <% } %>
                     </div>
+                    <%
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!hasAnyApplications) {
+                    %>
+                    <p style="color: #6b7280; text-align: center; padding: 2rem;">
+                        No applications received yet for your posted jobs.
+                    </p>
+                    <%
+                        }
+                    %>
                 </div>
             </div>
         </div>
@@ -495,10 +582,10 @@
         function switchTab(tabName) {
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => tab.classList.remove('active'));
-            
+
             const buttons = document.querySelectorAll('.tab-button');
             buttons.forEach(btn => btn.classList.remove('active'));
-            
+
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
         }

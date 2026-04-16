@@ -120,6 +120,16 @@
         .register-link a:hover {
             text-decoration: underline;
         }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -129,7 +139,13 @@
             <h1 class="title">BUPT International School</h1>
             <p class="subtitle">TA Recruitment System</p>
         </div>
-        
+
+        <% if ("1".equals(request.getParameter("error"))) { %>
+        <div class="error-message">
+            ✗ Invalid email, password, or role. Please try again.
+        </div>
+        <% } %>
+
         <form action="<%= request.getContextPath() %>/login" method="post">
             <div class="form-group">
                 <label for="email">Email</label>
