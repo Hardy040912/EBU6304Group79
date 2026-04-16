@@ -11,7 +11,10 @@
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
-    
+
+    // 初始化数据目录
+    DataFileUtil.initDataDir(application.getRealPath("/"));
+
     // 获取该 MO 发布的岗位
     List<String> jobs = DataFileUtil.readLines("jobs.txt");
     Map<String, String[]> myJobs = new HashMap<>();
@@ -310,10 +313,15 @@
                             <input type="hidden" name="status" value="accepted">
                             <button type="submit" class="btn-accept">✓ Accept</button>
                         </form>
-                        <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline;">
+                        <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline-block; margin-left: 0.5rem;" id="rejectForm_<%= appId %>">
                             <input type="hidden" name="appId" value="<%= appId %>">
                             <input type="hidden" name="status" value="rejected">
+                            <input type="hidden" name="blocked" id="blockedInput_<%= appId %>" value="false">
                             <button type="submit" class="btn-reject">✗ Reject</button>
+                            <label style="display: inline-block; margin-left: 0.5rem; font-size: 0.875rem; color: #4b5563; cursor: pointer;">
+                                <input type="checkbox" id="blockCheckbox_<%= appId %>" onchange="document.getElementById('blockedInput_<%= appId %>').value = this.checked ? 'true' : 'false';" style="margin-right: 0.25rem;">
+                                Block student from reapplying
+                            </label>
                         </form>
                     </div>
                     <% } %>

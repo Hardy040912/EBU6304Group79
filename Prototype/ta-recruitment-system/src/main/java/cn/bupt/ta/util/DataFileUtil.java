@@ -6,12 +6,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataFileUtil {
-    
-    private static final String DATA_DIR = "D:\\prototype\\EBU6304Group79\\Prototype\\ta-recruitment-system\\data\\";
-    
+
+    // 使用相对路径，部署时会自动解析到 WEB-INF/classes/data 或 webapp/data
+    private static String dataDir = null;
+
+    // 初始化数据目录
+    public static void initDataDir(String webAppPath) {
+        if (dataDir == null) {
+            // 数据文件存储在 webapp/data 目录下
+            dataDir = webAppPath + File.separator + "data" + File.separator;
+            File dir = new File(dataDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+        }
+    }
+
     public static List<String> readLines(String fileName) {
         List<String> lines = new ArrayList<>();
-        File file = new File(DATA_DIR + fileName);
+        if (dataDir == null) {
+            throw new RuntimeException("Data directory not initialized. Call initDataDir() first.");
+        }
+        File file = new File(dataDir + fileName);
         
         if (!file.exists()) {
             return lines;
@@ -31,9 +47,12 @@ public class DataFileUtil {
         
         return lines;
     }
-    
+
     public static void appendLine(String fileName, String line) {
-        File file = new File(DATA_DIR + fileName);
+        if (dataDir == null) {
+            throw new RuntimeException("Data directory not initialized. Call initDataDir() first.");
+        }
+        File file = new File(dataDir + fileName);
         
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8))) {
@@ -43,9 +62,12 @@ public class DataFileUtil {
             e.printStackTrace();
         }
     }
-    
+
     public static void writeLines(String fileName, List<String> lines) {
-        File file = new File(DATA_DIR + fileName);
+        if (dataDir == null) {
+            throw new RuntimeException("Data directory not initialized. Call initDataDir() first.");
+        }
+        File file = new File(dataDir + fileName);
         
         try (BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
@@ -66,7 +88,7 @@ public class DataFileUtil {
         } else if (fileName.equals("jobs.txt")) {
             return "jobId|title|moduleCode|module|organiser|organiserId|description|skills|hoursPerWeek|duration|status";
         } else if (fileName.equals("applications.txt")) {
-            return "appId|jobId|studentEmail|studentName|coverLetter|status|applyDate";
+            return "appId|jobId|studentEmail|studentName|coverLetter|status|applyDate|blocked";
         }
         return "";
     }

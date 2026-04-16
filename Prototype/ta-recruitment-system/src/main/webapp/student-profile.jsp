@@ -6,6 +6,18 @@
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
+
+    // 从 session 获取保存的数据
+    String savedSkills = (String) session.getAttribute("userSkills");
+    String savedExperience = (String) session.getAttribute("userExperience");
+
+    // 默认值
+    if (savedSkills == null) {
+        savedSkills = "Python, JavaScript, Machine Learning";
+    }
+    if (savedExperience == null) {
+        savedExperience = "I have experience in teaching and tutoring students in various programming courses.";
+    }
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -181,6 +193,15 @@
             margin-right: 0.25rem;
             margin-bottom: 0.25rem;
         }
+
+        .success-message {
+            background: #dcfce7;
+            color: #166534;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -198,10 +219,14 @@
     </header>
 
     <div class="container">
+        <% if ("1".equals(request.getParameter("success"))) { %>
+        <div class="success-message">✓ Profile saved successfully!</div>
+        <% } %>
+
         <div class="card">
             <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">Personal Information</h2>
-            
-            <form onsubmit="handleSubmit(event)">
+
+            <form action="<%= request.getContextPath() %>/updateProfile" method="post">
                 <div class="form-group">
                     <label for="name">Full Name</label>
                     <input type="text" id="name" value="<%= userName %>" readonly style="background: #f9fafb;">
@@ -214,14 +239,14 @@
                 
                 <div class="form-group">
                     <label for="skills">Skills (comma separated)</label>
-                    <input type="text" id="skills" placeholder="e.g., Python, JavaScript, Machine Learning" value="Python, JavaScript, Machine Learning">
+                    <input type="text" id="skills" name="skills" placeholder="e.g., Python, JavaScript, Machine Learning" value="<%= savedSkills %>">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="experience">Experience</label>
-                    <textarea id="experience" placeholder="Describe your relevant experience...">I have experience in teaching and tutoring students in various programming courses.</textarea>
+                    <textarea id="experience" name="experience" placeholder="Describe your relevant experience..."><%= savedExperience %></textarea>
                 </div>
-                
+
                 <div class="form-group">
                     <label>Upload CV (PDF)</label>
                     <div class="file-upload" onclick="document.getElementById('cvFile').click()">
@@ -229,12 +254,12 @@
                         <div class="file-upload-icon">📄</div>
                         <div class="file-upload-text">
                             Click to upload or drag and drop<br>
-                            <small>PDF (MAX. 5MB)</small>
+                            <small>PDF (MAX. 5MB) - Note: File upload is for demo only</small>
                         </div>
                         <div id="fileName" class="file-name"></div>
                     </div>
                 </div>
-                
+
                 <button type="submit" class="btn-submit">Save Profile</button>
             </form>
         </div>
@@ -246,11 +271,6 @@
             if (fileName) {
                 document.getElementById('fileName').textContent = '✓ ' + fileName;
             }
-        }
-        
-        function handleSubmit(event) {
-            event.preventDefault();
-            alert('Profile saved successfully! (Demo mode - file upload not implemented in V3)');
         }
     </script>
 </body>

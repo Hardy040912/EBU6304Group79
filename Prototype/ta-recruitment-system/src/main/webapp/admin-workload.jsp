@@ -10,11 +10,14 @@
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
-    
+
+    // 初始化数据目录
+    DataFileUtil.initDataDir(application.getRealPath("/"));
+
     // 统计每个学生的工作量
     Map<String, Integer> studentWorkload = new HashMap<>();
     Map<String, String> studentNames = new HashMap<>();
-    
+
     List<String> applications = DataFileUtil.readLines("applications.txt");
     List<String> jobs = DataFileUtil.readLines("jobs.txt");
     
@@ -245,12 +248,19 @@
                             int hours = entry.getValue();
                             String name = studentNames.get(email);
 
-                            int percentage = (hours * 100) / 20; // 假设最大20小时
+                            int maxHours = 20; // 固定最大 20 小时
+                            int percentage = (hours * 100) / maxHours;
                             String statusClass = "badge-low";
                             String statusText = "Normal";
                             String fillClass = "";
+                            String textColor = "";
 
-                            if (hours >= 16) {
+                            if (hours > maxHours) {
+                                statusClass = "badge-high";
+                                statusText = "⚠️ OVERLOADED";
+                                fillClass = "high";
+                                textColor = "color: #ef4444; font-weight: 700;";
+                            } else if (hours >= 16) {
                                 statusClass = "badge-high";
                                 statusText = "High";
                                 fillClass = "high";
@@ -263,7 +273,12 @@
                     <tr>
                         <td><strong><%= name %></strong></td>
                         <td><%= email %></td>
-                        <td><strong><%= hours %>h</strong> / 20h</td>
+                        <td style="<%= textColor %>">
+                            <strong><%= hours %>h</strong> / <%= maxHours %>h
+                            <% if (hours > maxHours) { %>
+                                <span style="color: #ef4444; font-weight: 700;"> (Exceeded by <%= hours - maxHours %>h)</span>
+                            <% } %>
+                        </td>
                         <td>
                             <div class="workload-bar">
                                 <div class="workload-fill <%= fillClass %>" style="width: <%= Math.min(percentage, 100) %>%"></div>

@@ -16,6 +16,9 @@ public class RegisterServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // 初始化数据目录
+        DataFileUtil.initDataDir(getServletContext().getRealPath("/"));
+
         request.setCharacterEncoding("UTF-8");
 
         String firstName = request.getParameter("firstName");

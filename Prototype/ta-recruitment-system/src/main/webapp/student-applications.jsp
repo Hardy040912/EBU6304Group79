@@ -10,7 +10,10 @@
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
-    
+
+    // 初始化数据目录
+    DataFileUtil.initDataDir(application.getRealPath("/"));
+
     // 获取岗位信息映射
     List<String> jobs = DataFileUtil.readLines("jobs.txt");
     Map<String, String[]> jobMap = new HashMap<>();

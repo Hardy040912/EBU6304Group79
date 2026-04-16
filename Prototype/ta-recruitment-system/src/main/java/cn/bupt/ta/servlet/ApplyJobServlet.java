@@ -15,9 +15,12 @@ import java.util.Date;
 public class ApplyJobServlet extends HttpServlet {
     
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
+        // 初始化数据目录
+        DataFileUtil.initDataDir(getServletContext().getRealPath("/"));
+
         request.setCharacterEncoding("UTF-8");
         
         HttpSession session = request.getSession();
@@ -33,13 +36,13 @@ public class ApplyJobServlet extends HttpServlet {
         // 获取当前日期
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String applyDate = sdf.format(new Date());
-        
-        // 格式: appId|jobId|studentEmail|studentName|coverLetter|status|applyDate
-        String appLine = appId + "|" + jobId + "|" + studentEmail + "|" + 
-                        studentName + "|" + coverLetter + "|pending|" + applyDate;
-        
+
+        // 格式: appId|jobId|studentEmail|studentName|coverLetter|status|applyDate|blocked
+        String appLine = appId + "|" + jobId + "|" + studentEmail + "|" +
+                        studentName + "|" + coverLetter + "|pending|" + applyDate + "|false";
+
         DataFileUtil.appendLine("applications.txt", appLine);
-        
+
         response.sendRedirect(request.getContextPath() + "/student-applications.jsp?success=1");
     }
 }

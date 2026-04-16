@@ -1,4 +1,78 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="cn.bupt.ta.util.DataFileUtil" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.HashSet" %>
+<%@ page import="java.util.Set" %>
+<%
+    String userEmail = (String) session.getAttribute("userEmail");
+    String userName = (String) session.getAttribute("userName");
+    if (userEmail == null) {
+        response.sendRedirect(request.getContextPath() + "/index.jsp");
+        return;
+    }
+
+    // 初始化数据目录
+    DataFileUtil.initDataDir(application.getRealPath("/"));
+
+    // 统计系统数据
+    List<String> users = DataFileUtil.readLines("users.txt");
+    List<String> jobs = DataFileUtil.readLines("jobs.txt");
+    List<String> applications = DataFileUtil.readLines("applications.txt");
+
+    // 统计学生数量
+    int totalStudents = 0;
+    for (String line : users) {
+        String[] parts = line.split("\\|");
+        if (parts.length >= 3 && "student".equals(parts[2])) {
+            totalStudents++;
+        }
+    }
+
+    // 统计开放岗位数量
+    int activeJobs = 0;
+    for (String line : jobs) {
+        String[] parts = line.split("\\|");
+        if (parts.length >= 11 && "open".equals(parts[10])) {
+            activeJobs++;
+        }
+    }
+
+    // 统计申请总数
+    int totalApplications = applications.size();
+
+    // 统计需要关注的工作量警告
+    int criticalAlerts = 0;
+    Set<String> studentEmails = new HashSet<>();
+    for (String line : applications) {
+        String[] parts = line.split("\\|");
+        if (parts.length >= 7 && "accepted".equals(parts[5])) {
+            studentEmails.add(parts[2]);
+        }
+    }
+    // 简单统计：假设超过 16 小时为 critical
+    for (String email : studentEmails) {
+        int hours = 0;
+        for (String line : applications) {
+            String[] parts = line.split("\\|");
+            if (parts.length >= 7 && parts[2].equals(email) && "accepted".equals(parts[5])) {
+                for (String jobLine : jobs) {
+                    String[] jobParts = jobLine.split("\\|");
+                    if (jobParts.length >= 11 && jobParts[0].equals(parts[1])) {
+                        try {
+                            hours += Integer.parseInt(jobParts[8].trim());
+                        } catch (NumberFormatException e) {
+                            // 忽略
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        if (hours >= 16) {
+            criticalAlerts++;
+        }
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -311,26 +385,15 @@
     </header>
 
     <div class="container">
-        <!-- Quick Actions -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-            <a href="<%= request.getContextPath() %>/admin-workload.jsp" style="text-decoration: none;">
-                <div class="card" style="cursor: pointer; transition: transform 0.15s;">
-                    <div style="text-align: center;">
-                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
-                        <div style="font-weight: 600; color: #111827;">View Workload</div>
-                        <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Check TA hours</div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
         <!-- Alert -->
+        <% if (criticalAlerts > 0) { %>
         <div class="alert">
             <span class="alert-icon">⚠️</span>
             <div class="alert-content">
-                <strong>3 workload alerts</strong> requiring attention. Check the workload balancing tab for details.
+                <strong><%= criticalAlerts %> workload alert<%= criticalAlerts > 1 ? "s" : "" %></strong> requiring attention. Check the workload balancing tab for details.
             </div>
         </div>
+        <% } %>
 
         <!-- Stats Cards -->
         <div class="stats-grid">
@@ -339,7 +402,7 @@
                     <span class="card-title">Total Students</span>
                     <span class="card-icon">👥</span>
                 </div>
-                <div class="card-value">4</div>
+                <div class="card-value"><%= totalStudents %></div>
                 <p class="card-description">Registered TAs</p>
             </div>
 
@@ -348,7 +411,7 @@
                     <span class="card-title">Active Jobs</span>
                     <span class="card-icon">💼</span>
                 </div>
-                <div class="card-value">4</div>
+                <div class="card-value"><%= activeJobs %></div>
                 <p class="card-description">Open positions</p>
             </div>
 
@@ -357,7 +420,7 @@
                     <span class="card-title">Applications</span>
                     <span class="card-icon">📈</span>
                 </div>
-                <div class="card-value">6</div>
+                <div class="card-value"><%= totalApplications %></div>
                 <p class="card-description">Total submitted</p>
             </div>
 
@@ -366,7 +429,7 @@
                     <span class="card-title">Critical Alerts</span>
                     <span class="card-icon">⚠️</span>
                 </div>
-                <div class="card-value">1</div>
+                <div class="card-value"><%= criticalAlerts %></div>
                 <p class="card-description">Needs attention</p>
             </div>
         </div>
@@ -384,45 +447,126 @@
                 <div class="chart-container">
                     <h2 class="chart-title">Student Workload Distribution</h2>
                     <div class="bar-chart">
+                        <%
+                            // 统计每个学生的工作量
+                            java.util.Map<String, Integer> studentHours = new java.util.HashMap<>();
+                            java.util.Map<String, String> studentNameMap = new java.util.HashMap<>();
+
+                            for (String line : applications) {
+                                String[] parts = line.split("\\|");
+                                if (parts.length >= 7 && "accepted".equals(parts[5])) {
+                                    String email = parts[2];
+                                    String name = parts[3];
+                                    studentNameMap.put(email, name);
+
+                                    for (String jobLine : jobs) {
+                                        String[] jobParts = jobLine.split("\\|");
+                                        if (jobParts.length >= 11 && jobParts[0].equals(parts[1])) {
+                                            try {
+                                                int hours = Integer.parseInt(jobParts[8].trim());
+                                                studentHours.put(email, studentHours.getOrDefault(email, 0) + hours);
+                                            } catch (NumberFormatException e) {
+                                                // 忽略
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (studentHours.isEmpty()) {
+                        %>
+                        <p style="color: #6b7280; text-align: center; padding: 2rem;">No student workload data available.</p>
+                        <%
+                            } else {
+                                for (java.util.Map.Entry<String, Integer> entry : studentHours.entrySet()) {
+                                    String email = entry.getKey();
+                                    int hours = entry.getValue();
+                                    String name = studentNameMap.get(email);
+                                    int maxHours = 20;
+                                    int percentage = (hours * 100) / maxHours;
+
+                                    String barColor = "bar-green";
+                                    String labelStyle = "";
+                                    if (hours > maxHours) {
+                                        barColor = "bar-red";
+                                        labelStyle = "color: #ef4444; font-weight: 700;";
+                                    } else if (percentage >= 80) {
+                                        barColor = "bar-red";
+                                    } else if (percentage >= 60) {
+                                        barColor = "bar-yellow";
+                                    }
+                        %>
                         <div class="bar-item">
-                            <div class="bar-label">Alice</div>
+                            <div class="bar-label" style="<%= labelStyle %>">
+                                <%= name %>
+                                <% if (hours > maxHours) { %>
+                                    <span style="color: #ef4444; font-size: 0.75rem;"> ⚠️ OVERLOADED</span>
+                                <% } %>
+                            </div>
                             <div class="bar-container">
-                                <div class="bar-fill bar-yellow" style="width: 60%;">12h / 20h (60%)</div>
+                                <div class="bar-fill <%= barColor %>" style="width: <%= Math.min(percentage, 100) %>%;">
+                                    <%= hours %>h / <%= maxHours %>h (<%= percentage %>%)
+                                    <% if (hours > maxHours) { %>
+                                        - Exceeded by <%= hours - maxHours %>h
+                                    <% } %>
+                                </div>
                             </div>
                         </div>
-                        <div class="bar-item">
-                            <div class="bar-label">Bob</div>
-                            <div class="bar-container">
-                                <div class="bar-fill bar-red" style="width: 100%;">15h / 15h (100%)</div>
-                            </div>
-                        </div>
-                        <div class="bar-item">
-                            <div class="bar-label">Carol</div>
-                            <div class="bar-container">
-                                <div class="bar-fill bar-green" style="width: 40%;">8h / 20h (40%)</div>
-                            </div>
-                        </div>
-                        <div class="bar-item">
-                            <div class="bar-label">David</div>
-                            <div class="bar-container">
-                                <div class="bar-fill bar-red" style="width: 100%;">18h / 18h (100%)</div>
-                            </div>
-                        </div>
+                        <%
+                                }
+                            }
+                        %>
                     </div>
                 </div>
 
                 <div class="card">
                     <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Recent Activity</h2>
                     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <%
+                            // 显示最近的申请（最多 5 条）
+                            int count = 0;
+                            for (int i = applications.size() - 1; i >= 0 && count < 5; i--) {
+                                String line = applications.get(i);
+                                String[] parts = line.split("\\|");
+                                if (parts.length >= 7) {
+                                    String studentName = parts[3];
+                                    String jobId = parts[1];
+                                    String status = parts[5];
+                                    String date = parts[6];
+
+                                    String jobTitle = "Unknown Job";
+                                    for (String jobLine : jobs) {
+                                        String[] jobParts = jobLine.split("\\|");
+                                        if (jobParts.length >= 11 && jobParts[0].equals(jobId)) {
+                                            jobTitle = jobParts[1];
+                                            break;
+                                        }
+                                    }
+
+                                    String activity = "";
+                                    if ("accepted".equals(status)) {
+                                        activity = studentName + " accepted for " + jobTitle;
+                                    } else if ("rejected".equals(status)) {
+                                        activity = studentName + " rejected for " + jobTitle;
+                                    } else {
+                                        activity = studentName + " applied for " + jobTitle;
+                                    }
+                                    count++;
+                        %>
                         <div style="padding: 0.75rem; background: #f9fafb; border-radius: 6px; font-size: 0.875rem;">
-                            <span style="color: #6b7280;">2026-03-16:</span> Alice Chen applied for Machine Learning Lab Assistant
+                            <span style="color: #6b7280;"><%= date %>:</span> <%= activity %>
                         </div>
-                        <div style="padding: 0.75rem; background: #f9fafb; border-radius: 6px; font-size: 0.875rem;">
-                            <span style="color: #6b7280;">2026-03-15:</span> Dr. Smith posted new job: Machine Learning Lab Assistant
-                        </div>
-                        <div style="padding: 0.75rem; background: #f9fafb; border-radius: 6px; font-size: 0.875rem;">
-                            <span style="color: #6b7280;">2026-03-15:</span> Carol Li accepted for Data Structures TA
-                        </div>
+                        <%
+                                }
+                            }
+
+                            if (count == 0) {
+                        %>
+                        <p style="color: #6b7280; text-align: center; padding: 1rem;">No recent activity.</p>
+                        <%
+                            }
+                        %>
                     </div>
                 </div>
             </div>
@@ -431,55 +575,86 @@
             <div id="workload" class="tab-content">
                 <div class="card">
                     <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Workload Alerts</h2>
-                    
-                    <div class="student-card" style="border-left: 4px solid #ef4444;">
-                        <div class="student-header">
-                            <div>
-                                <div class="student-name">Bob Wang</div>
-                                <div class="student-email">bob.wang@bupt.edu.cn</div>
-                            </div>
-                            <span class="alert-badge alert-critical">Critical</span>
-                        </div>
-                        <div class="workload-info">
-                            Current: 15h / Max: 15h (100% utilization)
-                        </div>
-                        <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">
-                            Student has reached maximum workload capacity. Cannot accept additional assignments.
-                        </p>
-                    </div>
 
-                    <div class="student-card" style="border-left: 4px solid #f59e0b;">
-                        <div class="student-header">
-                            <div>
-                                <div class="student-name">David Zhang</div>
-                                <div class="student-email">david.zhang@bupt.edu.cn</div>
-                            </div>
-                            <span class="alert-badge alert-warning">Warning</span>
-                        </div>
-                        <div class="workload-info">
-                            Current: 18h / Max: 18h (100% utilization)
-                        </div>
-                        <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">
-                            Student has reached maximum workload capacity. Cannot accept additional assignments.
-                        </p>
-                    </div>
+                    <%
+                        // 统计每个学生的工作量并显示警告
+                        java.util.Map<String, Integer> workloadMap = new java.util.HashMap<>();
+                        java.util.Map<String, String> nameMap = new java.util.HashMap<>();
 
-                    <div class="student-card" style="border-left: 4px solid #f59e0b;">
+                        for (String line : applications) {
+                            String[] parts = line.split("\\|");
+                            if (parts.length >= 7 && "accepted".equals(parts[5])) {
+                                String email = parts[2];
+                                String name = parts[3];
+                                nameMap.put(email, name);
+
+                                for (String jobLine : jobs) {
+                                    String[] jobParts = jobLine.split("\\|");
+                                    if (jobParts.length >= 11 && jobParts[0].equals(parts[1])) {
+                                        try {
+                                            int hours = Integer.parseInt(jobParts[8].trim());
+                                            workloadMap.put(email, workloadMap.getOrDefault(email, 0) + hours);
+                                        } catch (NumberFormatException e) {
+                                            // 忽略
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        boolean hasAlerts = false;
+
+                        // 显示 alerts (>= 16h)
+                        for (java.util.Map.Entry<String, Integer> entry : workloadMap.entrySet()) {
+                            String email = entry.getKey();
+                            int hours = entry.getValue();
+                            String name = nameMap.get(email);
+                            int maxHours = 20;
+                            int percentage = (hours * 100) / maxHours;
+
+                            if (hours >= 16) {
+                                hasAlerts = true;
+                                String borderColor = hours >= 18 ? "#ef4444" : "#f59e0b";
+                                String alertType = hours >= 18 ? "Critical" : "Warning";
+                                String alertClass = hours >= 18 ? "alert-critical" : "alert-warning";
+                    %>
+                    <div class="student-card" style="border-left: 4px solid <%= borderColor %>;">
                         <div class="student-header">
                             <div>
-                                <div class="student-name">Alice Chen</div>
-                                <div class="student-email">alice.chen@bupt.edu.cn</div>
+                                <div class="student-name"><%= name %></div>
+                                <div class="student-email"><%= email %></div>
                             </div>
-                            <span class="alert-badge alert-warning">Warning</span>
+                            <span class="alert-badge <%= alertClass %>"><%= alertType %></span>
                         </div>
                         <div class="workload-info">
-                            Current: 12h / Max: 20h (60% utilization)
+                            Current: <%= hours %>h / Max: <%= maxHours %>h (<%= percentage %>% utilization)
                         </div>
                         <p style="font-size: 0.875rem; color: #6b7280; margin-top: 0.5rem;">
-                            Pending application for 8h/week position would bring total to 20h (100% capacity).
+                            <% if (hours >= 18) { %>
+                            Student has reached high workload. Monitor closely for burnout risk.
+                            <% } else { %>
+                            Student approaching maximum workload capacity. Limited availability for new assignments.
+                            <% } %>
                         </p>
                     </div>
+                    <%
+                            }
+                        }
+
+                        if (!hasAlerts) {
+                    %>
+                    <p style="color: #6b7280; text-align: center; padding: 2rem;">
+                        No workload alerts. All students are within normal capacity.
+                    </p>
+                    <%
+                        }
+                    %>
                 </div>
+
+                <a href="<%= request.getContextPath() %>/admin-workload.jsp" style="text-decoration: none; display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: white; border: 1px solid #d1d5db; border-radius: 6px; color: #374151; font-size: 0.875rem;">
+                    View Full Workload Report →
+                </a>
             </div>
 
             <!-- Student Management Tab -->
@@ -487,81 +662,76 @@
                 <div class="card">
                     <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">All Students</h2>
                     <div class="student-list">
-                        <div class="student-card">
-                            <div class="student-header">
-                                <div>
-                                    <div class="student-name">Alice Chen</div>
-                                    <div class="student-email">alice.chen@bupt.edu.cn</div>
-                                </div>
-                                <div style="text-align: right;">
-                                    <div style="font-weight: 600; color: #2563eb;">12h / 20h</div>
-                                    <div style="font-size: 0.75rem; color: #6b7280;">60% utilized</div>
-                                </div>
-                            </div>
-                            <div>
-                                <span class="badge">Python</span>
-                                <span class="badge">JavaScript</span>
-                                <span class="badge">Machine Learning</span>
-                                <span class="badge">Data Analysis</span>
-                            </div>
-                        </div>
+                        <%
+                            // 显示所有学生及其工作量
+                            for (String line : users) {
+                                String[] parts = line.split("\\|");
+                                if (parts.length >= 4 && "student".equals(parts[2])) {
+                                    String email = parts[0];
+                                    String name = parts[3];
 
-                        <div class="student-card">
-                            <div class="student-header">
-                                <div>
-                                    <div class="student-name">Bob Wang</div>
-                                    <div class="student-email">bob.wang@bupt.edu.cn</div>
-                                </div>
-                                <div style="text-align: right;">
-                                    <div style="font-weight: 600; color: #ef4444;">15h / 15h</div>
-                                    <div style="font-size: 0.75rem; color: #6b7280;">100% utilized</div>
-                                </div>
-                            </div>
-                            <div>
-                                <span class="badge">Java</span>
-                                <span class="badge">Web Development</span>
-                                <span class="badge">React</span>
-                                <span class="badge">Node.js</span>
-                            </div>
-                        </div>
+                                    // 计算该学生的工作量
+                                    int hours = 0;
+                                    for (String appLine : applications) {
+                                        String[] appParts = appLine.split("\\|");
+                                        if (appParts.length >= 7 && appParts[2].equals(email) && "accepted".equals(appParts[5])) {
+                                            for (String jobLine : jobs) {
+                                                String[] jobParts = jobLine.split("\\|");
+                                                if (jobParts.length >= 11 && jobParts[0].equals(appParts[1])) {
+                                                    try {
+                                                        hours += Integer.parseInt(jobParts[8].trim());
+                                                    } catch (NumberFormatException e) {
+                                                        // 忽略
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
 
-                        <div class="student-card">
-                            <div class="student-header">
-                                <div>
-                                    <div class="student-name">Carol Li</div>
-                                    <div class="student-email">carol.li@bupt.edu.cn</div>
-                                </div>
-                                <div style="text-align: right;">
-                                    <div style="font-weight: 600; color: #10b981;">8h / 20h</div>
-                                    <div style="font-size: 0.75rem; color: #6b7280;">40% utilized</div>
-                                </div>
-                            </div>
-                            <div>
-                                <span class="badge">C++</span>
-                                <span class="badge">Data Structures</span>
-                                <span class="badge">Algorithms</span>
-                                <span class="badge">Teaching</span>
-                            </div>
-                        </div>
+                                    int maxHours = 20;
+                                    int percentage = maxHours > 0 ? (hours * 100) / maxHours : 0;
+                                    String color = "#10b981"; // green
+                                    String warningText = "";
 
-                        <div class="student-card">
+                                    if (hours > maxHours) {
+                                        color = "#ef4444"; // red
+                                        warningText = "⚠️ OVERLOADED by " + (hours - maxHours) + "h";
+                                    } else if (percentage >= 80) {
+                                        color = "#ef4444"; // red
+                                    } else if (percentage >= 60) {
+                                        color = "#2563eb"; // blue
+                                    }
+                        %>
+                        <div class="student-card" style="<%= hours > maxHours ? "border-left: 4px solid #ef4444;" : "" %>">
                             <div class="student-header">
                                 <div>
-                                    <div class="student-name">David Zhang</div>
-                                    <div class="student-email">david.zhang@bupt.edu.cn</div>
+                                    <div class="student-name" style="<%= hours > maxHours ? "color: #ef4444; font-weight: 700;" : "" %>">
+                                        <%= name %>
+                                        <% if (hours > maxHours) { %>
+                                            <span style="color: #ef4444; font-size: 0.875rem; font-weight: 700;"> ⚠️ OVERLOADED</span>
+                                        <% } %>
+                                    </div>
+                                    <div class="student-email"><%= email %></div>
                                 </div>
                                 <div style="text-align: right;">
-                                    <div style="font-weight: 600; color: #ef4444;">18h / 18h</div>
-                                    <div style="font-size: 0.75rem; color: #6b7280;">100% utilized</div>
+                                    <div style="font-weight: 600; color: <%= color %>;"><%= hours %>h / <%= maxHours %>h</div>
+                                    <div style="font-size: 0.75rem; color: <%= hours > maxHours ? "#ef4444" : "#6b7280" %>; font-weight: <%= hours > maxHours ? "700" : "normal" %>;">
+                                        <%= percentage %>% utilized
+                                        <% if (hours > maxHours) { %>
+                                            <br><span style="color: #ef4444;">Exceeded by <%= hours - maxHours %>h</span>
+                                        <% } %>
+                                    </div>
                                 </div>
                             </div>
                             <div>
-                                <span class="badge">Python</span>
-                                <span class="badge">Statistics</span>
-                                <span class="badge">Research</span>
-                                <span class="badge">MATLAB</span>
+                                <span class="badge">Skills: View profile for details</span>
                             </div>
                         </div>
+                        <%
+                                }
+                            }
+                        %>
                     </div>
                 </div>
             </div>

@@ -5,12 +5,44 @@
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
     String jobId = request.getParameter("jobId");
-    
+
     if (userEmail == null || jobId == null) {
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
-    
+
+    // 初始化数据目录
+    DataFileUtil.initDataDir(application.getRealPath("/"));
+
+    // 检查是否已经申请过
+    List<String> applications = DataFileUtil.readLines("applications.txt");
+    boolean alreadyApplied = false;
+    String existingStatus = "";
+    boolean isBlocked = false;
+
+    for (String line : applications) {
+        String[] parts = line.split("\\|");
+        if (parts.length >= 7 && parts[1].equals(jobId) && parts[2].equals(userEmail)) {
+            existingStatus = parts[5];
+
+            // 检查是否被屏蔽
+            if (parts.length >= 8 && "true".equals(parts[7])) {
+                isBlocked = true;
+                alreadyApplied = true;
+                break;
+            }
+
+            // 如果是 pending 或 accepted，不能再申请
+            if ("pending".equals(existingStatus) || "accepted".equals(existingStatus)) {
+                alreadyApplied = true;
+                break;
+            }
+
+            // 如果是 rejected 但没有被屏蔽，可以再次申请
+            // 所以不设置 alreadyApplied = true
+        }
+    }
+
     // 获取岗位信息
     List<String> jobs = DataFileUtil.readLines("jobs.txt");
     String jobTitle = "";
@@ -21,7 +53,7 @@
     String skills = "";
     String hoursPerWeek = "";
     String duration = "";
-    
+
     for (String line : jobs) {
         String[] parts = line.split("\\|");
         if (parts.length >= 11 && parts[0].equals(jobId)) {
@@ -192,6 +224,31 @@
         .btn-submit:hover {
             background: #1d4ed8;
         }
+
+        .btn-submit:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .warning-message {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            text-align: center;
+            border: 1px solid #fbbf24;
+        }
+
+        .info-message {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            text-align: center;
+            border: 1px solid #60a5fa;
+        }
     </style>
 </head>
 <body>
@@ -209,6 +266,22 @@
     </header>
 
     <div class="container">
+        <% if (alreadyApplied) { %>
+        <div class="<%= "accepted".equals(existingStatus) ? "info-message" : "warning-message" %>">
+            <% if ("accepted".equals(existingStatus)) { %>
+                ✓ You have already been accepted for this position!
+            <% } else if ("rejected".equals(existingStatus) && isBlocked) { %>
+                🚫 You are not allowed to apply for this position again. The organizer has blocked further applications from you for this role.
+            <% } else if ("rejected".equals(existingStatus)) { %>
+                ✗ Your previous application for this position was rejected. However, you may apply again if you wish.
+            <% } else { %>
+                ⏰ You have already applied for this position. Your application is pending review.
+            <% } %>
+            <br>
+            <a href="<%= request.getContextPath() %>/student-applications.jsp" style="color: inherit; text-decoration: underline;">View your applications</a>
+        </div>
+        <% } %>
+
         <div class="card">
             <div class="job-info">
                 <h2 class="job-title"><%= jobTitle %></h2>
@@ -226,18 +299,31 @@
                 </div>
                 <p style="color: #6b7280; font-size: 0.875rem;">⏰ <%= hoursPerWeek %>h/week | 📅 <%= duration %></p>
             </div>
-            
+
+            <% if (!alreadyApplied) { %>
             <form action="<%= request.getContextPath() %>/applyJob" method="post">
                 <input type="hidden" name="jobId" value="<%= jobId %>">
-                
+
                 <div class="form-group">
                     <label for="coverLetter">Cover Letter *</label>
-                    <textarea id="coverLetter" name="coverLetter" required 
+                    <textarea id="coverLetter" name="coverLetter" required
                               placeholder="Please explain why you are interested in this position and how your skills match the requirements..."></textarea>
                 </div>
-                
+
                 <button type="submit" class="btn-submit">Submit Application</button>
             </form>
+            <% } else { %>
+            <div style="text-align: center; padding: 2rem;">
+                <% if (isBlocked) { %>
+                    <p style="color: #6b7280; margin-bottom: 1rem;">You are blocked from applying to this position.</p>
+                <% } else { %>
+                    <p style="color: #6b7280; margin-bottom: 1rem;">You cannot apply for this position at this time.</p>
+                <% } %>
+                <a href="<%= request.getContextPath() %>/student-jobs.jsp" class="btn-submit" style="text-decoration: none; display: inline-block;">
+                    Browse Other Jobs
+                </a>
+            </div>
+            <% } %>
         </div>
     </div>
 </body>

@@ -1,12 +1,38 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.Map" %>
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
     if (userEmail == null) {
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
+    }
+
+    // 初始化数据目录
+    DataFileUtil.initDataDir(application.getRealPath("/"));
+
+    // 获取该学生已申请的岗位
+    List<String> applications = DataFileUtil.readLines("applications.txt");
+    Map<String, String> appliedJobs = new HashMap<>(); // jobId -> status
+    Map<String, Boolean> blockedJobs = new HashMap<>(); // jobId -> blocked
+
+    for (String line : applications) {
+        String[] parts = line.split("\\|");
+        if (parts.length >= 7 && parts[2].equals(userEmail)) {
+            String jobId = parts[1];
+            String status = parts[5];
+            boolean blocked = parts.length >= 8 && "true".equals(parts[7]);
+
+            // 只有 pending、accepted 或 被屏蔽的 rejected 才算"已申请"
+            if ("pending".equals(status) || "accepted".equals(status) ||
+                ("rejected".equals(status) && blocked)) {
+                appliedJobs.put(jobId, status);
+                blockedJobs.put(jobId, blocked);
+            }
+        }
     }
 %>
 <!DOCTYPE html>
@@ -207,13 +233,28 @@
                             String hoursPerWeek = parts[8];
                             String duration = parts[9];
                             String status = parts[10];
-                            
+
+                            // 检查是否已申请
+                            String appliedStatus = appliedJobs.get(jobId);
+                            boolean hasApplied = appliedStatus != null;
+
                             if ("open".equals(status)) {
             %>
             <div class="job-card">
                 <div class="job-header">
                     <div style="flex: 1;">
-                        <h3 class="job-title"><%= title %></h3>
+                        <h3 class="job-title">
+                            <%= title %>
+                            <% if (hasApplied) { %>
+                                <% if ("accepted".equals(appliedStatus)) { %>
+                                    <span style="background: #dcfce7; color: #166534; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem;">✓ Accepted</span>
+                                <% } else if ("rejected".equals(appliedStatus) && blockedJobs.get(jobId)) { %>
+                                    <span style="background: #fee2e2; color: #991b1b; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem;">🚫 Blocked</span>
+                                <% } else { %>
+                                    <span style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem;">⏰ Applied</span>
+                                <% } %>
+                            <% } %>
+                        </h3>
                         <p class="job-subtitle"><%= moduleCode %> - <%= moduleName %> | <%= organiser %></p>
                     </div>
                 </div>
@@ -232,7 +273,19 @@
                     <span>⏰ <%= hoursPerWeek %>h/week</span>
                     <span>📅 <%= duration %></span>
                 </div>
-                <a href="<%= request.getContextPath() %>/student-apply.jsp?jobId=<%= jobId %>" class="btn-apply">Apply Now</a>
+                <% if (hasApplied) { %>
+                    <% if ("rejected".equals(appliedStatus) && blockedJobs.get(jobId)) { %>
+                        <a href="<%= request.getContextPath() %>/student-applications.jsp" class="btn-apply" style="background: #ef4444; cursor: not-allowed;">
+                            🚫 Blocked
+                        </a>
+                    <% } else { %>
+                        <a href="<%= request.getContextPath() %>/student-applications.jsp" class="btn-apply" style="background: #9ca3af; cursor: default;">
+                            Already Applied
+                        </a>
+                    <% } %>
+                <% } else { %>
+                    <a href="<%= request.getContextPath() %>/student-apply.jsp?jobId=<%= jobId %>" class="btn-apply">Apply Now</a>
+                <% } %>
             </div>
             <%
                             }

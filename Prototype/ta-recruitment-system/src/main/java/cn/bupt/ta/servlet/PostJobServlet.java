@@ -13,9 +13,12 @@ import java.io.IOException;
 public class PostJobServlet extends HttpServlet {
     
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
+        // 初始化数据目录
+        DataFileUtil.initDataDir(getServletContext().getRealPath("/"));
+
         request.setCharacterEncoding("UTF-8");
         
         HttpSession session = request.getSession();

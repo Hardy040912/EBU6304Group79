@@ -17,6 +17,9 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // 初始化数据目录
+        DataFileUtil.initDataDir(getServletContext().getRealPath("/"));
+
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String role = request.getParameter("role");
