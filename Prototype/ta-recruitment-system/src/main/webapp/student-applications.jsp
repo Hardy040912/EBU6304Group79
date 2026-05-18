@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ include file="includes/application-payload.jsp" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.HashMap" %>
@@ -231,9 +232,19 @@
                         <div class="job-details">
                             <span>Applied: <%= applyDate %></span>
                         </div>
-                        <p style="color: #6b7280; font-size: 0.875rem; margin-top: 0.75rem;">
-                            <strong>Cover Letter:</strong> <%= coverLetter %>
-                        </p>
+                        <%
+                            String profileSnap = ApplicationPayload.profile(coverLetter);
+                            String coverOnly = ApplicationPayload.coverLetter(coverLetter);
+                        %>
+                        <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css">
+                        <div class="review-panel" style="margin-top:0.75rem;">
+                            <div class="review-panel-title">Profile submitted</div>
+                            <div class="review-panel-body"><%= ApplicationPayload.htmlWithBreaks(profileSnap.isEmpty() ? "(legacy application)" : profileSnap) %></div>
+                        </div>
+                        <div class="review-panel" style="margin-top:0.5rem;">
+                            <div class="review-panel-title">Cover letter for this job</div>
+                            <div class="review-panel-body"><%= ApplicationPayload.htmlWithBreaks(coverOnly) %></div>
+                        </div>
                     </div>
                     <span class="badge <%= statusBadge %>"><%= statusIcon %> <%= statusText %></span>
                 </div>
