@@ -1,4 +1,0 @@
-# 格式: jobId|title|moduleCode|module|organiser|organiserId|description|skills|hoursPerWeek|duration|status
-j1|Machine Learning Lab Assistant|CS401|Introduction to Machine Learning|Dr. Smith|dr.smith@bupt.edu.cn|Assist students with ML lab exercises|Python,Machine Learning,Teaching|8|12 weeks|open
-j2|Web Development Tutor|CS302|Web Technologies|Dr. Smith|dr.smith@bupt.edu.cn|Support students with React and Node.js projects|JavaScript,React,Web Development|10|16 weeks|open
-

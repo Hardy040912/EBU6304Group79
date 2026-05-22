@@ -1,3 +1,0 @@
-# 格式: appId|jobId|studentEmail|studentName|coverLetter|status|applyDate|blocked
-a1|j1|alice.chen@bupt.edu.cn|Alice Chen|I am interested in this position|pending|2024-03-20|false
-

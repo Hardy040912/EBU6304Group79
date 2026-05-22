@@ -382,8 +382,30 @@
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="tabs">
+        <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css">
+        <nav class="student-nav" style="padding-left:0;padding-right:0;margin-top:1rem;">
+            <a href="<%= request.getContextPath() %>/student-dashboard.jsp" class="active">Home</a>
+            <a href="<%= request.getContextPath() %>/student-jobs.jsp">Jobs</a>
+            <a href="<%= request.getContextPath() %>/student-profile.jsp">My Profile</a>
+            <a href="<%= request.getContextPath() %>/student-applications.jsp">Applications</a>
+        </nav>
+
+        <div class="hub-grid">
+            <a href="<%= request.getContextPath() %>/student-jobs.jsp" class="hub-card">
+                <h3>Browse jobs</h3>
+                <p>View open TA positions and apply with a role-specific cover letter.</p>
+            </a>
+            <a href="<%= request.getContextPath() %>/student-profile.jsp" class="hub-card">
+                <h3>My profile</h3>
+                <p>Update your standard CV once. It is attached to every application automatically.</p>
+            </a>
+            <a href="<%= request.getContextPath() %>/student-applications.jsp" class="hub-card">
+                <h3>My applications</h3>
+                <p>Track status of positions you have applied for.</p>
+            </a>
+        </div>
+
+        <div class="tabs" style="display:none;">
             <div class="tab-list">
                 <button class="tab-button active" onclick="switchTab('browse')">Browse Jobs</button>
                 <button class="tab-button" onclick="switchTab('applications')">My Applications</button>

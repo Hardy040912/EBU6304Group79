@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ include file="includes/application-payload.jsp" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.HashMap" %>
@@ -330,8 +331,10 @@
                         <span class="badge <%= statusBadge %>"><%= statusIcon %> <%= statusText %></span>
                     </div>
 
-                    <div style="margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #374151;">Cover Letter:</div>
-                    <div class="cover-letter"><%= coverLetter %></div>
+                    <% String profileText = ApplicationPayload.profile(coverLetter); String coverOnly = ApplicationPayload.coverLetter(coverLetter); %>
+                    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css">
+                    <div class="review-panel" style="margin-bottom:0.75rem;"><div class="review-panel-title">Applicant profile (account CV)</div><div class="review-panel-body"><%= ApplicationPayload.htmlWithBreaks(profileText.isEmpty() ? "No profile snapshot." : profileText) %></div></div>
+                    <div class="review-panel"><div class="review-panel-title">Cover letter for this position</div><div class="review-panel-body"><%= ApplicationPayload.htmlWithBreaks(coverOnly) %></div></div>
 
                     <%
                         Properties resumeData = DataFileUtil.loadResume(studentEmail);

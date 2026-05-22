@@ -31,6 +31,8 @@ public class UploadResumeServlet extends HttpServlet {
         props.setProperty("major",             nvl(request.getParameter("major")));
         props.setProperty("year",              nvl(request.getParameter("year")));
         props.setProperty("gpa",               nvl(request.getParameter("gpa")));
+        props.setProperty("portfolio",         nvl(request.getParameter("portfolio")));
+        props.setProperty("education",         nvl(request.getParameter("education")));
         props.setProperty("technicalSkills",   nvl(request.getParameter("technicalSkills")));
         props.setProperty("languageSkills",    nvl(request.getParameter("languageSkills")));
         props.setProperty("certifications",    nvl(request.getParameter("certifications")));

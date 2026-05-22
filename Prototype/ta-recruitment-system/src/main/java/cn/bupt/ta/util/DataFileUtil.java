@@ -92,6 +92,12 @@ public class DataFileUtil {
         return "";
     }
 
+    /** 生成自增 ID，格式为 prefix + 数字，基于文件中已有的行数 */
+    public static synchronized String nextId(String prefix, String fileName) {
+        List<String> lines = readLines(fileName);
+        return prefix + (lines.size() + 1);
+    }
+
     /** 将简历保存为 data/resumes/{email}.properties */
     public static void saveResume(String email, java.util.Properties props) {
         String resumeDir = dataDir + "resumes" + File.separator;
