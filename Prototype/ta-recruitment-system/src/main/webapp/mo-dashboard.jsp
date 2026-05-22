@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Properties" %>
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
@@ -342,6 +343,32 @@
         .btn-reject:hover {
             background: #b91c1c;
         }
+
+        .btn-resume {
+            padding: 0.375rem 0.75rem;
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        .btn-resume:hover { background: #dbeafe; }
+
+        .resume-panel {
+            display: none;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            color: #374151;
+            line-height: 1.8;
+        }
+        .resume-panel.open { display: block; }
+        .resume-section { margin-bottom: 0.5rem; }
+        .resume-section strong { color: #111827; }
     </style>
 </head>
 <body>
@@ -539,8 +566,39 @@
                         <div style="margin: 0.75rem 0; font-size: 0.875rem; color: #4b5563;">
                             <strong>Cover Letter:</strong> <%= coverLetter %>
                         </div>
+                        <%
+                            Properties resumeData = DataFileUtil.loadResume(studentEmail);
+                            boolean hasResume = !resumeData.isEmpty();
+                        %>
+                        <% if (hasResume) { %>
+                        <button class="btn-resume" onclick="toggleResume('dash_<%= appId %>')">📄 View Resume</button>
+                        <div id="resume_dash_<%= appId %>" class="resume-panel">
+                            <div class="resume-section"><strong>Basic Information</strong><br>
+                                Phone: <%= resumeData.getProperty("phone","—") %> &nbsp;|&nbsp;
+                                Major: <%= resumeData.getProperty("major","—") %> &nbsp;|&nbsp;
+                                Year: <%= resumeData.getProperty("year","—") %> &nbsp;|&nbsp;
+                                GPA: <%= resumeData.getProperty("gpa","—") %>
+                            </div>
+                            <div class="resume-section"><strong>Skills</strong><br>
+                                Technical: <%= resumeData.getProperty("technicalSkills","—") %><br>
+                                Language: <%= resumeData.getProperty("languageSkills","—") %><br>
+                                Certifications: <%= resumeData.getProperty("certifications","—") %>
+                            </div>
+                            <div class="resume-section"><strong>Teaching / Tutoring Experience</strong><br>
+                                <%= resumeData.getProperty("teachingExp","—").replace("\n","<br>") %>
+                            </div>
+                            <div class="resume-section"><strong>Project Experience</strong><br>
+                                <%= resumeData.getProperty("projectExp","—").replace("\n","<br>") %>
+                            </div>
+                            <div class="resume-section"><strong>Personal Statement</strong><br>
+                                <%= resumeData.getProperty("personalStatement","—") %>
+                            </div>
+                        </div>
+                        <% } else { %>
+                        <span style="font-size:0.75rem;color:#9ca3af;">No resume uploaded</span>
+                        <% } %>
                         <% if ("pending".equals(status)) { %>
-                        <div class="btn-group">
+                        <div class="btn-group" style="margin-top: 1rem;">
                             <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline;">
                                 <input type="hidden" name="appId" value="<%= appId %>">
                                 <input type="hidden" name="status" value="accepted">
@@ -588,6 +646,11 @@
 
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
+        }
+
+        function toggleResume(id) {
+            const panel = document.getElementById('resume_' + id);
+            panel.classList.toggle('open');
         }
     </script>
 </body>

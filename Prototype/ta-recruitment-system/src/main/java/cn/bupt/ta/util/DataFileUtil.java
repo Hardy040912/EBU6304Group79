@@ -13,8 +13,7 @@ public class DataFileUtil {
     // 初始化数据目录
     public static void initDataDir(String webAppPath) {
         if (dataDir == null) {
-            // 数据文件存储在 webapp/data 目录下
-            dataDir = webAppPath + File.separator + "data" + File.separator;
+            dataDir = "D:" + File.separator + "ta-recruitment-data" + File.separator;
             File dir = new File(dataDir);
             if (!dir.exists()) {
                 dir.mkdirs();
@@ -91,5 +90,39 @@ public class DataFileUtil {
             return "appId|jobId|studentEmail|studentName|coverLetter|status|applyDate|blocked";
         }
         return "";
+    }
+
+    /** 生成自增 ID，格式为 prefix + 数字，基于文件中已有的行数 */
+    public static synchronized String nextId(String prefix, String fileName) {
+        List<String> lines = readLines(fileName);
+        return prefix + (lines.size() + 1);
+    }
+
+    /** 将简历保存为 data/resumes/{email}.properties */
+    public static void saveResume(String email, java.util.Properties props) {
+        String resumeDir = dataDir + "resumes" + File.separator;
+        new File(resumeDir).mkdirs();
+        String path = resumeDir + email.replace("@", "_at_").replace(".", "_") + ".properties";
+        try (OutputStream out = new FileOutputStream(path)) {
+            props.store(out, "Resume for " + email);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** 读取简历，若不存在返回空 Properties */
+    public static java.util.Properties loadResume(String email) {
+        java.util.Properties props = new java.util.Properties();
+        if (dataDir == null) return props;
+        String path = dataDir + "resumes" + File.separator
+                + email.replace("@", "_at_").replace(".", "_") + ".properties";
+        File file = new File(path);
+        if (!file.exists()) return props;
+        try (InputStream in = new FileInputStream(file)) {
+            props.load(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return props;
     }
 }

@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="cn.bupt.ta.util.DataFileUtil" %>
+<%@ page import="java.util.Properties" %>
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
@@ -7,12 +9,8 @@
         return;
     }
 
-    String savedSkills = (String) session.getAttribute("userSkills");
-    String savedExperience = (String) session.getAttribute("userExperience");
-    if (savedSkills == null) savedSkills = "";
-    if (savedExperience == null) savedExperience = "";
-
-    String escSkills = savedSkills.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;");
+    DataFileUtil.initDataDir(application.getRealPath("/"));
+    Properties resume = DataFileUtil.loadResume(userEmail);
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -105,6 +103,28 @@
             margin-bottom: 1rem;
             text-align: center;
         }
+
+        .template-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #475569;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
     </style>
 </head>
 <body>
@@ -125,13 +145,16 @@
         <% if ("1".equals(request.getParameter("success"))) { %>
         <div class="success-message">✓ Your standard resume has been saved. It will be attached when you apply for positions.</div>
         <% } %>
+        <% if ("2".equals(request.getParameter("success"))) { %>
+        <div class="success-message">✓ Resume saved successfully!</div>
+        <% } %>
 
         <div class="page-intro">
             <h2>Your account profile (standard CV)</h2>
             <p>This is saved once on your account, like a profile on Apple Jobs. When you apply for a position, organisers see this profile plus a separate cover letter you write for that job only.</p>
         </div>
 
-        <form id="profileForm" action="<%= request.getContextPath() %>/updateProfile" method="post">
+        <form id="profileForm" action="<%= request.getContextPath() %>/uploadResume" method="post">
             <div class="layout-two-col has-preview">
                 <div class="card">
                     <!-- Section 1 -->
@@ -154,36 +177,36 @@
                             </div>
                             <div class="form-group">
                                 <label for="phone" class="label-required">Phone</label>
-                                <input type="tel" id="phone" placeholder="+86 138 0000 0000" required>
+                                <input type="tel" id="phone" name="phone" placeholder="+86 138 0000 0000" value="<%= resume.getProperty("phone","") %>">
                             </div>
                             <div class="form-group">
                                 <label for="major" class="label-required">Major / programme</label>
-                                <input type="text" id="major" placeholder="e.g. Computer Science and Technology" required>
+                                <input type="text" id="major" name="major" placeholder="e.g. Computer Science and Technology" value="<%= resume.getProperty("major","") %>">
                             </div>
                             <div class="form-group">
                                 <label for="grade" class="label-required">Year of study</label>
-                                <select id="grade" required>
+                                <select id="grade" name="year">
                                     <option value="">Select year</option>
-                                    <option value="Year 1">Year 1</option>
-                                    <option value="Year 2">Year 2</option>
-                                    <option value="Year 3">Year 3</option>
-                                    <option value="Year 4">Year 4</option>
-                                    <option value="Postgraduate">Postgraduate</option>
+                                    <option value="Year 1" <%= "Year 1".equals(resume.getProperty("year","")) ? "selected" : "" %>>Year 1</option>
+                                    <option value="Year 2" <%= "Year 2".equals(resume.getProperty("year","")) ? "selected" : "" %>>Year 2</option>
+                                    <option value="Year 3" <%= "Year 3".equals(resume.getProperty("year","")) ? "selected" : "" %>>Year 3</option>
+                                    <option value="Year 4" <%= "Year 4".equals(resume.getProperty("year","")) ? "selected" : "" %>>Year 4</option>
+                                    <option value="Postgraduate" <%= "Postgraduate".equals(resume.getProperty("year","")) ? "selected" : "" %>>Postgraduate</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label for="gpa">GPA / average score</label>
-                                <input type="text" id="gpa" placeholder="e.g. 3.8 / 4.0 or 88/100">
+                                <input type="text" id="gpa" name="gpa" placeholder="e.g. 3.8 / 4.0 or 88/100" value="<%= resume.getProperty("gpa","") %>">
                             </div>
                             <div class="form-group" style="grid-column: 1 / -1;">
                                 <label for="portfolio">LinkedIn / portfolio (optional)</label>
-                                <input type="text" id="portfolio" placeholder="https://linkedin.com/in/yourname">
+                                <input type="text" id="portfolio" name="portfolio" placeholder="https://linkedin.com/in/yourname" value="<%= resume.getProperty("portfolio","") %>">
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="education" class="label-required">Education</label>
-                            <textarea id="education" class="template-area" required
-                                placeholder="BUPT International School | BEng Computer Science&#10;Expected graduation: June 2027&#10;Relevant coursework: Data Structures, Machine Learning, Software Engineering"></textarea>
+                            <textarea id="education" name="education" class="template-area"
+                                placeholder="BUPT International School | BEng Computer Science&#10;Expected graduation: June 2027&#10;Relevant coursework: Data Structures, Machine Learning, Software Engineering"><%= resume.getProperty("education","") %></textarea>
                             <p class="field-hint">One entry per school. Include degree, dates, and 2–3 relevant courses.</p>
                             <button type="button" class="btn-secondary" data-template="education">Insert example structure</button>
                         </div>
@@ -200,19 +223,19 @@
                         </div>
                         <div class="form-group">
                             <label for="technicalSkills" class="label-required">Technical skills</label>
-                            <input type="text" id="technicalSkills" value="<%= escSkills %>" required
+                            <input type="text" id="technicalSkills" name="technicalSkills" value="<%= resume.getProperty("technicalSkills","") %>"
                                    placeholder="e.g. Python, Java, SQL, Git, LaTeX, MATLAB">
                             <p class="field-example">Separate items with commas.</p>
                         </div>
                         <div class="form-group">
                             <label for="languageSkills" class="label-required">Language skills</label>
-                            <input type="text" id="languageSkills" required
+                            <input type="text" id="languageSkills" name="languageSkills" value="<%= resume.getProperty("languageSkills","") %>"
                                    placeholder="e.g. English (fluent), Chinese (native), IELTS 7.0">
                         </div>
                         <div class="form-group">
                             <label for="certifications">Awards &amp; certificates</label>
-                            <textarea id="certifications" class="template-area"
-                                placeholder="• Dean's List, 2024–2025&#10;• CET-6 / IELTS certificate&#10;• Programming competition award"></textarea>
+                            <textarea id="certifications" name="certifications" class="template-area"
+                                placeholder="• Dean's List, 2024–2025&#10;• CET-6 / IELTS certificate&#10;• Programming competition award"><%= resume.getProperty("certifications","") %></textarea>
                             <button type="button" class="btn-secondary" data-template="certifications">Insert example structure</button>
                         </div>
                     </div>
@@ -228,29 +251,26 @@
                         </div>
                         <div class="form-group">
                             <label for="teachingExperience" class="label-required">Teaching / tutoring experience</label>
-                            <textarea id="teachingExperience" class="template-area template-area-lg" required
-                                placeholder="Course TA | Introduction to Programming (CS101) | Sep 2024 – Jan 2025&#10;• Assisted weekly labs for 60 students&#10;• Graded assignments and held office hours (2h/week)"></textarea>
+                            <textarea id="teachingExperience" name="teachingExp" class="template-area template-area-lg"
+                                placeholder="Course TA | Introduction to Programming (CS101) | Sep 2024 – Jan 2025&#10;• Assisted weekly labs for 60 students&#10;• Graded assignments and held office hours (2h/week)"><%= resume.getProperty("teachingExp","") %></textarea>
                             <button type="button" class="btn-secondary" data-template="teaching">Insert example structure</button>
                         </div>
                         <div class="form-group">
                             <label for="projectExperience">Project / research experience</label>
-                            <textarea id="projectExperience" class="template-area template-area-lg"
-                                placeholder="ML Course Project | Team lead | Mar 2025&#10;• Built classification pipeline in Python (scikit-learn)&#10;• Presented results to faculty panel"></textarea>
+                            <textarea id="projectExperience" name="projectExp" class="template-area template-area-lg"
+                                placeholder="ML Course Project | Team lead | Mar 2025&#10;• Built classification pipeline in Python (scikit-learn)&#10;• Presented results to faculty panel"><%= resume.getProperty("projectExp","") %></textarea>
                             <button type="button" class="btn-secondary" data-template="projects">Insert example structure</button>
                         </div>
                         <div class="form-group">
                             <label for="selfIntroduction" class="label-required">Summary for TA roles</label>
-                            <textarea id="selfIntroduction" class="template-area" required
-                                placeholder="2–4 sentences: your strengths as a TA, subjects you can support, and how you help students learn."></textarea>
+                            <textarea id="selfIntroduction" name="personalStatement" class="template-area"
+                                placeholder="2–4 sentences: your strengths as a TA, subjects you can support, and how you help students learn."><%= resume.getProperty("personalStatement","") %></textarea>
                             <p class="field-hint">This short summary appears at the end of your saved resume.</p>
                         </div>
                     </div>
 
-                    <input type="hidden" id="hiddenSkills" name="skills">
-                    <textarea id="hiddenExperience" name="experience" class="hidden-submit-field"></textarea>
-
                     <div class="form-actions">
-                        <button type="submit" class="btn-submit">Save Profile</button>
+                        <button type="submit" class="btn-submit">💾 Save Resume</button>
                         <span class="save-hint">Saved resume is used automatically when you apply for jobs.</span>
                     </div>
                 </div>
@@ -266,17 +286,12 @@
         </form>
     </div>
 
-    <textarea id="bootSkills" class="hidden-submit-field"><%= savedSkills %></textarea>
-    <textarea id="bootExperience" class="hidden-submit-field"><%= savedExperience %></textarea>
-
     <script src="<%= request.getContextPath() %>/js/resume-forms.js"></script>
     <script>
         (function () {
             var RF = window.TaResumeForms;
             var userName = '<%= userName.replace("'", "\\'") %>';
             var userEmail = '<%= userEmail.replace("'", "\\'") %>';
-            var savedSkills = document.getElementById('bootSkills').value;
-            var savedExperience = document.getElementById('bootExperience').value;
 
             var templates = {
                 education: "BUPT International School | BEng [Your Major]\nExpected graduation: [Month Year]\nRelevant coursework: [Course 1], [Course 2], [Course 3]",
@@ -314,32 +329,6 @@
                     RF.buildResumePreviewHtml(userName, userEmail, fields, skills);
             }
 
-            function hydrateFromSaved() {
-                var parsedSkills = RF.parseSkillsField(savedSkills);
-                document.getElementById('technicalSkills').value = parsedSkills.tech;
-                document.getElementById('languageSkills').value = parsedSkills.lang;
-
-                var fields = RF.parseSavedExperience(savedExperience);
-                document.getElementById('phone').value = fields.phone;
-                document.getElementById('major').value = fields.major;
-                document.getElementById('grade').value = fields.grade;
-                document.getElementById('gpa').value = fields.gpa;
-                document.getElementById('portfolio').value = fields.portfolio;
-                document.getElementById('education').value = fields.education;
-                document.getElementById('teachingExperience').value = fields.teaching;
-                document.getElementById('projectExperience').value = fields.projects;
-                document.getElementById('certifications').value = fields.awards;
-                document.getElementById('selfIntroduction').value = fields.summary;
-                updatePreview();
-            }
-
-            document.getElementById('profileForm').addEventListener('submit', function () {
-                var fields = readFields();
-                var skills = readSkills();
-                document.getElementById('hiddenSkills').value = RF.serializeSkillsField(skills.tech, skills.lang);
-                document.getElementById('hiddenExperience').value = RF.buildExperienceBlock(fields);
-            });
-
             document.querySelectorAll('[data-template]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var key = btn.getAttribute('data-template');
@@ -360,7 +349,7 @@
             document.getElementById('profileForm').addEventListener('input', updatePreview);
             document.getElementById('profileForm').addEventListener('change', updatePreview);
 
-            hydrateFromSaved();
+            updatePreview();
         })();
     </script>
 </body>
