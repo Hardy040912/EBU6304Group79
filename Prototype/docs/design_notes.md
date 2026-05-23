@@ -68,3 +68,49 @@ To keep JSP pages thin and consistent:
 - Profile autosave (optional, same pattern as cover letter).
 - Align **`mo-dashboard.jsp`** application preview with dual-panel layout.
 - Server-side draft API if cross-device resume is required.
+
+---
+
+## Sprint 4 — Global Branding & Role-Based UI Shell (Yizhou Ma, jp2023213572 / S1LNCE-Y)
+
+### Design note 1: BUPT visual identity and per-role page themes
+**Problem:** After Sprint 3, inner pages still looked like separate Bootstrap-style screens — inconsistent fonts, no school identity, and every role shared the same grey background. Login/register had been styled, but dashboards felt disconnected from BUPT International School branding.
+
+**Decision:** Introduce a shared shell in **`css/bupt-brand.css`**:
+- **Typography:** Lexend for UI text; Zen Tokyo Zoo for the large “BUPT” watermark.
+- **Watermark:** Fixed full-viewport background on all app pages; blurred on inner pages so content stays readable.
+- **Role-specific `<body>` classes and backgrounds:**
+
+| Role | Body class | Background |
+|------|------------|------------|
+| Student | `app-page` | Grey `#e9edf2` (unchanged from Sprint 3) |
+| Module Organiser | `mo-page` | Light blue `#dceaf7` |
+| Administrator | `admin-page` | Dark `#0f1419` |
+
+**Rationale:** Students keep the familiar neutral workspace; MO and Admin get visually distinct environments that match their task context (recruitment ops vs. system oversight). Header shows **“BUPT International School”** above the page title on all roles for consistent identity.
+
+**Implementation:** Auth pages use `auth-page`; app pages load `bupt-brand.css` + `resume-forms.css`. Dark-theme overrides for admin cards, tables, stat tabs, and action links live in `bupt-brand.css` so JSP inline styles stay minimal.
+
+**Branch:** `feature/ui-branding-nav-mo-yizhou` → PR into `main`.
+
+---
+
+### Design note 2: Shared pill navigation and MO review polish
+**Problem:** Student pages gained a hub nav in Sprint 3, but MO and Admin still used one-off links (`← Dashboard`, underline tabs, mixed button styles). MO application review also used loud green/red buttons and emoji for hours/duration, which felt inconsistent with a professional recruitment tool.
+
+**Decision:**
+1. **Reusable pill nav** (`includes/student-nav.jsp`, `mo-nav.jsp`, `admin-nav.jsp`) — same `.student-nav` pattern everywhere:
+
+| Role | Nav items |
+|------|-----------|
+| Student | Home · Jobs · My Profile · Applications |
+| MO | Home · Post Job · Applications |
+| Admin | Overview · Recruitment · Post Job · Applications · Workload |
+
+2. **MO Applications UI** — larger job/applicant headings (`.mo-job-heading`, `.mo-applicant-name`); muted Accept/Reject buttons; **View Resume** with grey document icon (`.ui-icon-document`); job hours/duration via **`includes/job-meta.jsp`** (clock/calendar SVG icons instead of emoji).
+
+3. **MO dashboard tabs** restyled as pill buttons (`.mo-tab-list` / `.mo-tab-button`) to match student/MO top nav.
+
+**Rationale:** One navigation language across roles reduces re-learning when switching accounts in demos. Grey meta icons and softer actions keep focus on applicant content, not chrome.
+
+**Open items:** When Admin is logged in, `mo-nav.jsp` also exposes Admin Overview / Workload links on MO pages — consider consolidating fully into `admin-nav.jsp` in a later sprint to avoid duplicate nav patterns.
