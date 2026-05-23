@@ -21,17 +21,21 @@ public class PostJobServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
         
-        HttpSession session = request.getSession();
+        HttpSession session = request.getSession(false);
+        if (session == null || !"module-organiser".equals(session.getAttribute("userRole"))) {
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            return;
+        }
         String organiserEmail = (String) session.getAttribute("userEmail");
         String organiserName = (String) session.getAttribute("userName");
         
-        String title = request.getParameter("title");
-        String moduleCode = request.getParameter("moduleCode");
-        String moduleName = request.getParameter("moduleName");
-        String description = request.getParameter("description");
-        String skills = request.getParameter("skills");
-        String hoursPerWeek = request.getParameter("hoursPerWeek");
-        String duration = request.getParameter("duration");
+        String title = DataFileUtil.safeField(request.getParameter("title"));
+        String moduleCode = DataFileUtil.safeField(request.getParameter("moduleCode"));
+        String moduleName = DataFileUtil.safeField(request.getParameter("moduleName"));
+        String description = DataFileUtil.safeField(request.getParameter("description"));
+        String skills = DataFileUtil.safeField(request.getParameter("skills"));
+        String hoursPerWeek = DataFileUtil.safeField(request.getParameter("hoursPerWeek"));
+        String duration = DataFileUtil.safeField(request.getParameter("duration"));
         
         // 生成岗位ID
         String jobId = System.currentTimeMillis() + "_" + (int)(Math.random() * 10000);

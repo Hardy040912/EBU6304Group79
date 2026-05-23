@@ -126,6 +126,16 @@
             grid-template-columns: 1fr 1fr;
             gap: 1rem;
         }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -135,6 +145,16 @@
             <h1 class="title">Create Account</h1>
             <p class="subtitle">Join BUPT TA Recruitment System</p>
         </div>
+
+        <% if ("duplicate".equals(request.getParameter("error"))) { %>
+        <div class="error-message">This email address is already registered.</div>
+        <% } else if ("staff".equals(request.getParameter("error"))) { %>
+        <div class="error-message">Invalid staff ID. Module organiser accounts require a school-issued staff ID.</div>
+        <% } else if ("role".equals(request.getParameter("error"))) { %>
+        <div class="error-message">This role cannot be registered from this page.</div>
+        <% } else if ("password".equals(request.getParameter("error"))) { %>
+        <div class="error-message">Passwords do not match.</div>
+        <% } %>
         
         <form action="<%= request.getContextPath() %>/register" method="post">
             <div class="form-row">
@@ -169,8 +189,18 @@
                 <select id="role" name="role" required>
                     <option value="student">Student (TA)</option>
                     <option value="module-organiser">Module Organiser</option>
-                    <option value="admin">Administrator</option>
                 </select>
+                <small style="display:block; margin-top:0.5rem; color:#6b7280;">
+                    Administrator accounts are provided directly by the school.
+                </small>
+            </div>
+
+            <div class="form-group" id="staffIdGroup" style="display:none;">
+                <label for="staffId">Staff ID</label>
+                <input type="text" id="staffId" name="staffId" placeholder="e.g. T1001">
+                <small style="display:block; margin-top:0.5rem; color:#6b7280;">
+                    Required for Module Organiser registration.
+                </small>
             </div>
             
             <button type="submit" class="btn">Create Account</button>
@@ -180,5 +210,22 @@
             </div>
         </form>
     </div>
+    <script>
+        const roleSelect = document.getElementById('role');
+        const staffIdGroup = document.getElementById('staffIdGroup');
+        const staffIdInput = document.getElementById('staffId');
+
+        function syncStaffIdField() {
+            const isModuleOrganiser = roleSelect.value === 'module-organiser';
+            staffIdGroup.style.display = isModuleOrganiser ? 'block' : 'none';
+            staffIdInput.required = isModuleOrganiser;
+            if (!isModuleOrganiser) {
+                staffIdInput.value = '';
+            }
+        }
+
+        roleSelect.addEventListener('change', syncStaffIdField);
+        syncStaffIdField();
+    </script>
 </body>
 </html>

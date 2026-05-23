@@ -69,6 +69,7 @@ tomcat/webapps/ta-recruitment-system/data/
 1. 先复制现有数据文件：
 ```
 data/users.txt
+data/staff_ids.txt
 data/jobs.txt
 data/applications.txt
 ```
@@ -90,12 +91,16 @@ tomcat/webapps/ta-recruitment-system/data/
 | Module Organiser | mo@bupt.edu.cn | 123456 | Li Si |
 | Admin | admin@bupt.edu.cn | 123456 | Wang Wu |
 
+Module Organiser registration requires a school-issued staff ID from `staff_ids.txt`.
+Default valid staff IDs include `T1001`, `T1002`, and `T1003`.
+
 ## 数据文件位置
 
 部署后，数据文件位于：
 ```
 <TOMCAT_HOME>/webapps/ta-recruitment-system/data/
 - users.txt
+- staff_ids.txt
 - jobs.txt
 - applications.txt
 ```

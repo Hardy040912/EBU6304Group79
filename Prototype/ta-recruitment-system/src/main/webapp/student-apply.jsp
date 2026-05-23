@@ -1,12 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Properties" %>
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
     String jobId = request.getParameter("jobId");
 
-    if (userEmail == null || jobId == null) {
+    if (userEmail == null || !"student".equals(session.getAttribute("userRole")) || jobId == null) {
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
@@ -44,11 +45,27 @@
     String hoursPerWeek = "";
     String duration = "";
 
-    String userSkills = (String) session.getAttribute("userSkills");
-    String userExperience = (String) session.getAttribute("userExperience");
-    if (userSkills == null) userSkills = "";
-    if (userExperience == null) userExperience = "";
-    boolean profileIncomplete = userSkills.trim().isEmpty() && userExperience.trim().isEmpty();
+    Properties resume = DataFileUtil.loadResume(userEmail);
+    String userSkills = "TECH:" + resume.getProperty("technicalSkills", "") +
+            "|LANG:" + resume.getProperty("languageSkills", "");
+    String userExperience =
+            "Phone:\n" + resume.getProperty("phone", "") + "\n\n" +
+            "Major:\n" + resume.getProperty("major", "") + "\n\n" +
+            "Year of Study:\n" + resume.getProperty("year", "") + "\n\n" +
+            "GPA / Average Score:\n" + resume.getProperty("gpa", "") + "\n\n" +
+            "LinkedIn / Portfolio:\n" + resume.getProperty("portfolio", "") + "\n\n" +
+            "Education:\n" + resume.getProperty("education", "") + "\n\n" +
+            "Teaching / Tutoring Experience:\n" + resume.getProperty("teachingExp", "") + "\n\n" +
+            "Project / Research Experience:\n" + resume.getProperty("projectExp", "") + "\n\n" +
+            "Awards / Certificates:\n" + resume.getProperty("certifications", "") + "\n\n" +
+            "Summary for TA Roles:\n" + resume.getProperty("personalStatement", "");
+    boolean profileIncomplete =
+            resume.getProperty("technicalSkills", "").trim().isEmpty() &&
+            resume.getProperty("languageSkills", "").trim().isEmpty() &&
+            resume.getProperty("education", "").trim().isEmpty() &&
+            resume.getProperty("teachingExp", "").trim().isEmpty() &&
+            resume.getProperty("projectExp", "").trim().isEmpty() &&
+            resume.getProperty("personalStatement", "").trim().isEmpty();
 
     for (String line : jobs) {
         String[] parts = line.split("\\|");
@@ -69,6 +86,8 @@
     String escModuleCode = moduleCode.replace("&", "&amp;").replace("<", "&lt;");
     String escModuleName = moduleName.replace("&", "&amp;").replace("<", "&lt;");
     String escOrganiser = organiser.replace("&", "&amp;").replace("<", "&lt;");
+    String escUserSkills = userSkills.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    String escUserExperience = userExperience.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     String greetingName = organiser.trim().isEmpty() ? "Hiring Committee" : organiser;
     String escGreetingName = greetingName.replace("&", "&amp;").replace("\"", "&quot;");
 %>
@@ -212,8 +231,8 @@
 
             <form id="applyForm" action="<%= request.getContextPath() %>/applyJob" method="post">
                 <input type="hidden" name="jobId" value="<%= jobId %>">
-                <textarea id="bootSkills" class="hidden-submit-field"><%= userSkills %></textarea>
-                <textarea id="bootExperience" class="hidden-submit-field"><%= userExperience %></textarea>
+                <textarea id="bootSkills" class="hidden-submit-field"><%= escUserSkills %></textarea>
+                <textarea id="bootExperience" class="hidden-submit-field"><%= escUserExperience %></textarea>
                 <input type="hidden" id="bootEmail" value="<%= userEmail %>">
 
                 <div class="apply-steps">

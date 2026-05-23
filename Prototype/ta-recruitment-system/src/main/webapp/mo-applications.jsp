@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="includes/application-payload.jsp" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
+<%@ page import="cn.bupt.ta.util.SkillMatcher" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
@@ -9,7 +10,7 @@
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
-    if (userEmail == null) {
+    if (userEmail == null || !"module-organiser".equals(session.getAttribute("userRole"))) {
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
@@ -249,6 +250,20 @@
         .resume-panel.open { display: block; }
         .resume-section { margin-bottom: 0.75rem; }
         .resume-section strong { color: #111827; }
+
+        .match-panel {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            margin: 0.75rem 0;
+            font-size: 0.8rem;
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .match-panel strong { color: #111827; }
+        .match-score { color: #2563eb; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -339,7 +354,13 @@
                     <%
                         Properties resumeData = DataFileUtil.loadResume(studentEmail);
                         boolean hasResume = !resumeData.isEmpty();
+                        SkillMatcher.MatchResult match = SkillMatcher.match(jobInfo[7], resumeData);
                     %>
+                    <div class="match-panel">
+                        <div><strong>Skill match:</strong> <span class="match-score"><%= match.getScore() %>%</span></div>
+                        <div><strong>Matched:</strong> <%= match.getMatchedSummary() %></div>
+                        <div><strong>Missing:</strong> <%= match.getMissingSummary() %></div>
+                    </div>
                     <% if (hasResume) { %>
                     <button class="btn-resume" onclick="toggleResume('<%= appId %>')">📄 View Resume</button>
                     <div id="resume_<%= appId %>" class="resume-panel">

@@ -6,6 +6,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +23,20 @@ public class UpdateApplicationStatusServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
+        HttpSession session = request.getSession(false);
+        if (session == null || !"module-organiser".equals(session.getAttribute("userRole"))) {
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            return;
+        }
+
         String appId = request.getParameter("appId");
         String newStatus = request.getParameter("status");
         String blocked = request.getParameter("blocked"); // "true" 或 null
+
+        if (!"accepted".equals(newStatus) && !"rejected".equals(newStatus)) {
+            response.sendRedirect(request.getContextPath() + "/mo-applications.jsp?error=invalidStatus");
+            return;
+        }
 
         List<String> applications = DataFileUtil.readLines("applications.txt");
         List<String> updatedApplications = new ArrayList<>();

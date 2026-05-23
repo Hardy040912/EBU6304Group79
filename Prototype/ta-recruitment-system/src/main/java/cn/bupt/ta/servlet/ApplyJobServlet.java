@@ -22,6 +22,10 @@ public class ApplyJobServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/index.jsp");
             return;
         }
+        if (!"student".equals(session.getAttribute("userRole"))) {
+            response.sendRedirect(request.getContextPath() + "/index.jsp");
+            return;
+        }
 
         DataFileUtil.initDataDir(getServletContext().getRealPath("/"));
 

@@ -1,12 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
+<%@ page import="cn.bupt.ta.util.SkillMatcher" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="java.util.Properties" %>
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
-    if (userEmail == null) {
+    if (userEmail == null || !"student".equals(session.getAttribute("userRole"))) {
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
@@ -17,6 +19,12 @@
     // 计算当前工作量
     List<String> applications = DataFileUtil.readLines("applications.txt");
     List<String> jobs = DataFileUtil.readLines("jobs.txt");
+    Properties resume = DataFileUtil.loadResume(userEmail);
+    List<String> mySkillList = SkillMatcher.parseSkills(
+            resume.getProperty("technicalSkills", "") + "," +
+            resume.getProperty("languageSkills", "") + "," +
+            resume.getProperty("certifications", "")
+    );
 
     Map<String, String[]> jobMap = new HashMap<>();
     for (String line : jobs) {
@@ -373,11 +381,16 @@
                     <span class="card-title">My Skills</span>
                     <span class="card-icon">✨</span>
                 </div>
-                <div class="card-value">4</div>
+                <div class="card-value"><%= mySkillList.size() %></div>
                 <div>
-                    <span class="badge">Python</span>
-                    <span class="badge">JavaScript</span>
-                    <span class="badge">ML</span>
+                    <% if (mySkillList.isEmpty()) { %>
+                        <span class="card-description">Complete your profile to enable skill matching.</span>
+                    <% } else {
+                        for (String skill : mySkillList) {
+                    %>
+                        <span class="badge"><%= skill %></span>
+                    <%  }
+                       } %>
                 </div>
             </div>
         </div>

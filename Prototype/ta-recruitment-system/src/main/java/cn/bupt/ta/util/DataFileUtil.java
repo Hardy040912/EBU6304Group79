@@ -12,12 +12,10 @@ public class DataFileUtil {
 
     // 初始化数据目录
     public static void initDataDir(String webAppPath) {
-        if (dataDir == null) {
-            dataDir = "D:" + File.separator + "ta-recruitment-data" + File.separator;
-            File dir = new File(dataDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
+        dataDir = webAppPath + File.separator + "data" + File.separator;
+        File dir = new File(dataDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
         }
     }
 
@@ -80,10 +78,22 @@ public class DataFileUtil {
             e.printStackTrace();
         }
     }
+
+    public static String safeField(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value.replace("|", "/")
+                .replace("\r", " ")
+                .replace("\n", " ")
+                .trim();
+    }
     
     private static String getFormatComment(String fileName) {
         if (fileName.equals("users.txt")) {
-            return "email|password|role|name";
+            return "email|password|role|name|staffId(optional)";
+        } else if (fileName.equals("staff_ids.txt")) {
+            return "staffId|name";
         } else if (fileName.equals("jobs.txt")) {
             return "jobId|title|moduleCode|module|organiser|organiserId|description|skills|hoursPerWeek|duration|status";
         } else if (fileName.equals("applications.txt")) {
@@ -92,10 +102,23 @@ public class DataFileUtil {
         return "";
     }
 
-    /** 生成自增 ID，格式为 prefix + 数字，基于文件中已有的行数 */
+    /** 生成自增 ID，格式为 prefix + 数字 */
     public static synchronized String nextId(String prefix, String fileName) {
-        List<String> lines = readLines(fileName);
-        return prefix + (lines.size() + 1);
+        int maxId = 0;
+        for (String line : readLines(fileName)) {
+            String[] parts = line.split("\\|");
+            if (parts.length == 0 || !parts[0].startsWith(prefix)) {
+                continue;
+            }
+
+            String numericPart = parts[0].substring(prefix.length());
+            try {
+                maxId = Math.max(maxId, Integer.parseInt(numericPart));
+            } catch (NumberFormatException ignored) {
+                // Ignore legacy or malformed IDs while keeping valid IDs ordered.
+            }
+        }
+        return prefix + (maxId + 1);
     }
 
     /** 将简历保存为 data/resumes/{email}.properties */

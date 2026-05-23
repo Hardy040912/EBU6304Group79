@@ -1,18 +1,21 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
+<%@ page import="cn.bupt.ta.util.SkillMatcher" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="java.util.Properties" %>
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
-    if (userEmail == null) {
+    if (userEmail == null || !"student".equals(session.getAttribute("userRole"))) {
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
 
     // 初始化数据目录
     DataFileUtil.initDataDir(application.getRealPath("/"));
+    Properties resume = DataFileUtil.loadResume(userEmail);
 
     // 获取该学生已申请的岗位
     List<String> applications = DataFileUtil.readLines("applications.txt");
@@ -193,6 +196,35 @@
         .btn-apply:hover {
             background: #1d4ed8;
         }
+
+        .match-panel {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .match-score {
+            color: #2563eb;
+            white-space: nowrap;
+        }
+
+        .match-line {
+            margin-top: 0.25rem;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -233,6 +265,7 @@
                             String hoursPerWeek = parts[8];
                             String duration = parts[9];
                             String status = parts[10];
+                            SkillMatcher.MatchResult match = SkillMatcher.match(skills, resume);
 
                             // 检查是否已申请
                             String appliedStatus = appliedJobs.get(jobId);
@@ -268,6 +301,14 @@
                     <%
                         }
                     %>
+                </div>
+                <div class="match-panel">
+                    <div class="match-header">
+                        <span>Explainable skill match</span>
+                        <span class="match-score"><%= match.getScore() %>% match</span>
+                    </div>
+                    <div class="match-line"><strong>Matched:</strong> <%= match.getMatchedSummary() %></div>
+                    <div class="match-line"><strong>Missing:</strong> <%= match.getMissingSummary() %></div>
                 </div>
                 <div class="job-details">
                     <span>⏰ <%= hoursPerWeek %>h/week</span>

@@ -6,7 +6,7 @@
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
-    if (userEmail == null) {
+    if (userEmail == null || !"admin".equals(session.getAttribute("userRole"))) {
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
