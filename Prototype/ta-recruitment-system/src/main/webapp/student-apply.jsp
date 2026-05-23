@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Properties" %>
@@ -97,7 +97,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apply for Job - TA Recruitment System</title>
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=9">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=4">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -159,13 +160,18 @@
             margin-bottom: 1rem; text-align: center; border: 1px solid #60a5fa;
         }
         .section-heading {
-            font-size: 1.125rem; font-weight: 600; color: #111827;
-            margin: 1.5rem 0 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb;
+            font-family: "Lexend", system-ui, sans-serif;
+            font-size: 1.375rem;
+            font-weight: 700;
+            color: #111827;
+            margin: 1.75rem 0 0.875rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
         }
         .section-heading:first-of-type { margin-top: 0; }
     </style>
 </head>
-<body>
+<body class="app-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
@@ -173,30 +179,26 @@
                 <p>Welcome, <%= userName %></p>
             </div>
             <div class="header-nav">
-                <a href="<%= request.getContextPath() %>/student-jobs.jsp" class="btn">�?Back to Jobs</a>
                 <a href="<%= request.getContextPath() %>/logout" class="btn">🚪 Logout</a>
             </div>
         </div>
     </header>
 
-    <nav class="student-nav">
-        <a href="<%= request.getContextPath() %>/student-dashboard.jsp">Home</a>
-        <a href="<%= request.getContextPath() %>/student-jobs.jsp" class="active">Jobs</a>
-        <a href="<%= request.getContextPath() %>/student-profile.jsp">My Profile</a>
-        <a href="<%= request.getContextPath() %>/student-applications.jsp">Applications</a>
-    </nav>
+    <jsp:include page="includes/student-nav.jsp">
+        <jsp:param name="active" value="jobs" />
+    </jsp:include>
 
     <div class="container">
         <% if (alreadyApplied) { %>
         <div class="<%= "accepted".equals(existingStatus) ? "info-message" : "warning-message" %>">
             <% if ("accepted".equals(existingStatus)) { %>
-                �?You have already been accepted for this position!
+                &#10003; You have already been accepted for this position!
             <% } else if ("rejected".equals(existingStatus) && isBlocked) { %>
                 🚫 You cannot apply for this position again.
             <% } else if ("rejected".equals(existingStatus)) { %>
-                �?Your previous application was rejected. You may apply again.
+                Your previous application was rejected. You may apply again.
             <% } else { %>
-                �?Your application is pending review.
+                Your application is pending review.
             <% } %>
             <br><a href="<%= request.getContextPath() %>/student-applications.jsp" style="color: inherit; text-decoration: underline;">View your applications</a>
         </div>
@@ -216,7 +218,13 @@
                         }
                     } %>
                 </div>
-                <p style="color: #6b7280; font-size: 0.875rem;">�?<%= hoursPerWeek %>h/week | 📅 <%= duration %></p>
+                <p style="color: #6b7280; font-size: 0.875rem;">
+                    <jsp:include page="includes/job-meta.jsp">
+                        <jsp:param name="hours" value="<%= hoursPerWeek %>" />
+                        <jsp:param name="duration" value="<%= duration %>" />
+                        <jsp:param name="layout" value="row" />
+                    </jsp:include>
+                </p>
             </div>
 
             <% if (!alreadyApplied) { %>
@@ -260,20 +268,6 @@
                 <p class="field-hint" style="margin-bottom: 0.5rem;">Reviewers see this separately from your profile.</p>
                 <p id="autosaveStatus" class="autosave-status">Draft not saved yet</p>
 
-                <!-- REMOVED_DUP
-                <h3 class="section-heading REMOVE_START">Part 1 �?Your standard resume (from profile)</h3>
-                <p class="field-hint" style="margin-bottom: 0.75rem;">
-                    This is loaded from <strong>Profile &amp; CV</strong>. To update it,
-                    <a href="<%= request.getContextPath() %>/student-profile.jsp">edit your profile</a> before submitting.
-                </p>
-                <div id="resumePreviewBox" class="resume-readonly-box"></div>
-
-                <h3 class="section-heading">Part 2 �?Cover letter for this position</h3>
-                <div class="page-intro" style="margin-bottom: 1.25rem;">
-                    <h2>Structured cover letter template</h2>
-                    <p>Fill in each paragraph (typical UK/US academic job letter). Aim for about 250�?00 words in total. Only the cover letter section is editable here; your resume is attached automatically.</p>
-                </div> REMOVED_DUP -->
-
                 <div class="cover-section">
                     <label for="coverGreeting">Salutation</label>
                     <input type="text" id="coverGreeting" name="coverGreeting"
@@ -282,7 +276,7 @@
                 </div>
 
                 <div class="cover-section">
-                    <label for="coverOpening" class="label-required">Opening �?state the role you are applying for</label>
+                    <label for="coverOpening" class="label-required">Opening &mdash; state the role you are applying for</label>
                     <textarea id="coverOpening" class="template-area" required
                         placeholder="I am writing to apply for the [position] supporting [module] in [semester/year]."></textarea>
                     <p class="field-example">Mention <%= escJobTitle %> and <%= escModuleCode %> explicitly.</p>
@@ -291,7 +285,7 @@
                 <div class="cover-section">
                     <label for="coverInterest" class="label-required">Why you are interested</label>
                     <textarea id="coverInterest" class="template-area" required
-                        placeholder="Explain your interest in this module and how the role fits your academic goals (2�? sentences)."></textarea>
+                        placeholder="Explain your interest in this module and how the role fits your academic goals (2&ndash;3 sentences)."></textarea>
                 </div>
 
                 <div class="cover-section">
@@ -311,7 +305,7 @@
                     <label for="coverClosing" class="label-required">Closing</label>
                     <textarea id="coverClosing" class="template-area" required
                         placeholder="Thank the reader and express willingness to discuss further."></textarea>
-                    <p class="field-example">e.g. “Thank you for your consideration. I look forward to supporting students in this module.�?/p>
+                    <p class="field-example">e.g. “Thank you for your consideration. I look forward to supporting students in this module.&quot;</p>
                 </div>
 
                 <p id="wordCount" class="word-count">0 words</p>
@@ -423,9 +417,9 @@
                 if (!document.getElementById('coverQualifications').value.trim()) {
                     document.getElementById('coverQualifications').value =
                         'My relevant experience includes:\n' +
-                        '�?[Teaching/tutoring example]\n' +
-                        '�?[Technical skill or project related to the module]\n' +
-                        '�?[Communication or teamwork example]';
+                        '\u2022 [Teaching/tutoring example]\n' +
+                        '\u2022 [Technical skill or project related to the module]\n' +
+                        '\u2022 [Communication or teamwork example]';
                 }
                 if (!document.getElementById('coverAvailability').value.trim()) {
                     document.getElementById('coverAvailability').value =

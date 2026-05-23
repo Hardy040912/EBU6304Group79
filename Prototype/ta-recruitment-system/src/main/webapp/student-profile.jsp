@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.Properties" %>
 <%
@@ -18,7 +18,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Standard Resume Profile - TA Recruitment System</title>
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=8">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=4">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -127,7 +128,7 @@
         }
     </style>
 </head>
-<body>
+<body class="app-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
@@ -135,11 +136,14 @@
                 <p>Welcome, <%= userName %></p>
             </div>
             <div class="header-nav">
-                <a href="<%= request.getContextPath() %>/student-dashboard.jsp" class="btn">← Dashboard</a>
                 <a href="<%= request.getContextPath() %>/logout" class="btn">🚪 Logout</a>
             </div>
         </div>
     </header>
+
+    <jsp:include page="includes/student-nav.jsp">
+        <jsp:param name="active" value="profile" />
+    </jsp:include>
 
     <div class="container">
         <% if ("1".equals(request.getParameter("success"))) { %>

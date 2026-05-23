@@ -1,0 +1,271 @@
+/* BUPT International School — global shell, watermark, school name */
+
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Zen+Tokyo+Zoo&display=swap");
+
+:root {
+    --bupt-bg: #e9edf2;
+    --bupt-card: #ffffff;
+    --bupt-ink: #0f1419;
+}
+
+html {
+    min-height: 100%;
+    background-color: var(--bupt-bg);
+}
+
+html::before {
+    content: "BUPT";
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: -1;
+    pointer-events: none;
+    user-select: none;
+    font-family: "Zen Tokyo Zoo", cursive, sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 44vw;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.62);
+    transform: translate(-50%, -50%) scaleX(0.92) scaleY(0.98);
+    transform-origin: center center;
+}
+
+html:has(body.app-page)::before {
+    filter: blur(16px);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+body {
+    background-color: transparent !important;
+    min-height: 100vh;
+    position: relative;
+}
+
+.bupt-school-name {
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: clamp(1.5rem, 4.2vw, 2.35rem);
+    font-weight: 700;
+    color: var(--bupt-ink);
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+}
+
+body.app-page .header-title::before {
+    content: "BUPT International School";
+    display: block;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: clamp(1.25rem, 3vw, 1.875rem);
+    font-weight: 700;
+    color: var(--bupt-ink);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin-bottom: 0.35rem;
+    white-space: nowrap;
+}
+
+body.app-page .header-title h1 {
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    color: #374151 !important;
+}
+
+body.app-page .header-title p {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+body.app-page .header {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(15, 20, 25, 0.08);
+}
+
+body.app-page .card {
+    background: var(--bupt-card);
+    box-shadow: 0 4px 24px rgba(15, 20, 25, 0.06);
+}
+
+body.auth-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+}
+
+body.auth-page .card {
+    background: var(--bupt-card);
+    box-shadow: 0 4px 24px rgba(15, 20, 25, 0.08);
+    border: 1px solid rgba(15, 20, 25, 0.06);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 42rem;
+    min-width: min(100%, 20rem);
+    padding: 2.25rem 2.5rem;
+}
+
+body.auth-page .header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+
+body.auth-page .bupt-school-name {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+body.auth-page .subtitle {
+    font-family: "Lexend", system-ui, sans-serif;
+    color: #6b7280;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+body.auth-page .form-group {
+    margin-bottom: 1.125rem;
+}
+
+body.auth-page label {
+    display: block;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+body.auth-page input,
+body.auth-page select {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.0625rem;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+
+body.auth-page input:focus,
+body.auth-page select:focus {
+    outline: none;
+    border-color: #8a9bab;
+    box-shadow: 0 0 0 3px rgba(122, 143, 163, 0.2);
+}
+
+body.auth-page .btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-top: 0.25rem;
+    background-color: #7a8fa3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+body.auth-page .btn:hover {
+    background-color: #6a7f93;
+}
+
+body.auth-page .register-link {
+    text-align: center;
+    margin-top: 1.25rem;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 0.9375rem;
+    color: #6b7280;
+}
+
+body.auth-page .register-link a {
+    color: #5c6f82;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+body.auth-page .register-link a:hover {
+    text-decoration: underline;
+}
+
+body.auth-page .error-message {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Grey outline meta icons (hours / duration) */
+.job-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.job-meta-row {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.job-meta-sep {
+    color: #d1d5db;
+    user-select: none;
+}
+
+.ui-icon {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    background-color: currentColor;
+    opacity: 0.9;
+    vertical-align: -0.125em;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+.ui-icon-sm {
+    width: 0.8125rem;
+    height: 0.8125rem;
+}
+
+.ui-icon-clock {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='13' r='8'/%3E%3Cpath d='M12 9v4l2.5 2.5'/%3E%3Cpath d='M10 2h4'/%3E%3Cpath d='M12 2v2'/%3E%3Cpath d='M19.5 4.5l-1.5 1.5'/%3E%3Cpath d='M4.5 4.5l1.5 1.5'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='13' r='8'/%3E%3Cpath d='M12 9v4l2.5 2.5'/%3E%3Cpath d='M10 2h4'/%3E%3Cpath d='M12 2v2'/%3E%3Cpath d='M19.5 4.5l-1.5 1.5'/%3E%3Cpath d='M4.5 4.5l1.5 1.5'/%3E%3C/svg%3E");
+}
+
+.ui-icon-calendar {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+}
+
+.badge-with-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.ui-icon-document {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 2v6h6'/%3E%3Cpath d='M16 13H8'/%3E%3Cpath d='M16 17H8'/%3E%3Cpath d='M10 9H8'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 2v6h6'/%3E%3Cpath d='M16 13H8'/%3E%3Cpath d='M16 17H8'/%3E%3Cpath d='M10 9H8'/%3E%3C/svg%3E");
+}
