@@ -2,25 +2,17 @@
 <%
     String active = request.getParameter("active");
     if (active == null) {
-        active = (String) request.getAttribute("moNavActive");
+        active = (String) request.getAttribute("adminNavActive");
     }
     if (active == null) {
         active = "";
     }
     String cp = request.getContextPath();
-    String role = (String) session.getAttribute("userRole");
-    boolean adminNav = "admin".equals(role);
 %>
 <nav class="student-nav">
-    <% if (adminNav) { %>
-    <a href="<%= cp %>/admin-dashboard.jsp"<%= "admin".equals(active) ? " class=\"active\"" : "" %>>Admin Overview</a>
-    <a href="<%= cp %>/mo-dashboard.jsp"<%= "home".equals(active) ? " class=\"active\"" : "" %>>Recruitment</a>
-    <% } else { %>
-    <a href="<%= cp %>/mo-dashboard.jsp"<%= "home".equals(active) ? " class=\"active\"" : "" %>>Home</a>
-    <% } %>
+    <a href="<%= cp %>/admin-dashboard.jsp"<%= "home".equals(active) ? " class=\"active\"" : "" %>>Overview</a>
+    <a href="<%= cp %>/mo-dashboard.jsp"<%= "recruitment".equals(active) ? " class=\"active\"" : "" %>>Recruitment</a>
     <a href="<%= cp %>/mo-post-job.jsp"<%= "post".equals(active) ? " class=\"active\"" : "" %>>Post Job</a>
     <a href="<%= cp %>/mo-applications.jsp"<%= "applications".equals(active) ? " class=\"active\"" : "" %>>Applications</a>
-    <% if (adminNav) { %>
     <a href="<%= cp %>/admin-workload.jsp"<%= "workload".equals(active) ? " class=\"active\"" : "" %>>Workload</a>
-    <% } %>
 </nav>

@@ -2,7 +2,9 @@
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
-    if (userEmail == null || !"module-organiser".equals(session.getAttribute("userRole"))) {
+    String userRole = (String) session.getAttribute("userRole");
+    boolean isAdmin = "admin".equals(userRole);
+    if (userEmail == null || (!"module-organiser".equals(userRole) && !isAdmin)) {
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
@@ -13,8 +15,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post New Job - TA Recruitment System</title>
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=10">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=5">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=11">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=7">
     <style>
         * {
             margin: 0;
@@ -151,7 +153,7 @@
         }
     </style>
 </head>
-<body class="app-page">
+<body class="mo-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">

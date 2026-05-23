@@ -33,9 +33,23 @@ html::before {
     transform-origin: center center;
 }
 
-html:has(body.app-page)::before {
+html:has(body.app-page)::before,
+html:has(body.mo-page)::before {
     filter: blur(16px);
     color: rgba(255, 255, 255, 0.5);
+}
+
+html:has(body.mo-page) {
+    background-color: #dceaf7;
+}
+
+html:has(body.admin-page) {
+    background-color: #0f1419;
+}
+
+html:has(body.admin-page)::before {
+    filter: blur(20px);
+    color: rgba(255, 255, 255, 0.05);
 }
 
 body {
@@ -55,7 +69,9 @@ body {
     white-space: nowrap;
 }
 
-body.app-page .header-title::before {
+body.app-page .header-title::before,
+body.mo-page .header-title::before,
+body.admin-page .header-title::before {
     content: "BUPT International School";
     display: block;
     font-family: "Lexend", system-ui, sans-serif;
@@ -68,26 +84,261 @@ body.app-page .header-title::before {
     white-space: nowrap;
 }
 
-body.app-page .header-title h1 {
+body.app-page .header-title h1,
+body.mo-page .header-title h1 {
     font-size: 1.125rem !important;
     font-weight: 600 !important;
     color: #374151 !important;
 }
 
-body.app-page .header-title p {
+body.app-page .header-title p,
+body.mo-page .header-title p {
     font-size: 0.875rem;
     color: #6b7280;
 }
 
-body.app-page .header {
+body.app-page .header,
+body.mo-page .header {
     background: rgba(255, 255, 255, 0.92) !important;
     backdrop-filter: blur(8px);
     border-bottom: 1px solid rgba(15, 20, 25, 0.08);
+    padding: 1rem 0;
 }
 
-body.app-page .card {
+body.app-page .card,
+body.mo-page .card {
     background: var(--bupt-card);
     box-shadow: 0 4px 24px rgba(15, 20, 25, 0.06);
+}
+
+body.mo-page,
+body.admin-page {
+    font-family: "Lexend", system-ui, sans-serif;
+}
+
+body.mo-page .header-content,
+body.admin-page .header-content {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+body.mo-page .btn-logout,
+body.admin-page .btn-logout {
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #374151;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 0.875rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+body.mo-page .btn-logout:hover {
+    background: #f9fafb;
+}
+
+/* Admin — dark theme */
+body.admin-page {
+    color: #e2e8f0;
+}
+
+body.admin-page .header-title::before {
+    color: #f1f5f9;
+}
+
+body.admin-page .header-title h1 {
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    color: #f1f5f9 !important;
+}
+
+body.admin-page .header-title p {
+    font-size: 0.875rem;
+    color: #94a3b8;
+}
+
+body.admin-page .header {
+    background: rgba(26, 32, 44, 0.92) !important;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1rem 0;
+}
+
+body.admin-page .btn-logout {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #e2e8f0;
+}
+
+body.admin-page .btn-logout:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+body.admin-page .card,
+body.admin-page .chart-container,
+body.admin-page .student-card {
+    background: #1a2332;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+    color: #e2e8f0;
+}
+
+body.admin-page .card-title,
+body.admin-page .card-description,
+body.admin-page .bar-label,
+body.admin-page .workload-info,
+body.admin-page .student-email {
+    color: #94a3b8;
+}
+
+body.admin-page .card-value,
+body.admin-page .chart-title,
+body.admin-page .student-name {
+    color: #f1f5f9;
+}
+
+body.admin-page .card-icon {
+    color: #64748b;
+}
+
+body.admin-page .alert {
+    background: rgba(251, 191, 36, 0.12);
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+body.admin-page .alert-content {
+    color: #fcd34d;
+}
+
+body.admin-page .bar-container {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.admin-page thead {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+body.admin-page th {
+    color: #cbd5e1;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.admin-page td {
+    color: #94a3b8;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+body.admin-page tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+body.admin-page .workload-bar {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.admin-page h2 {
+    color: #f1f5f9;
+}
+
+body.admin-page .activity-item {
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #cbd5e1;
+}
+
+body.admin-page .admin-secondary-link {
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: #e2e8f0;
+    font-size: 0.875rem;
+}
+
+body.admin-page .admin-secondary-link:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+body.admin-page .admin-muted {
+    color: #94a3b8;
+}
+
+body.admin-page .stat-card {
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    border: 2px solid transparent;
+}
+
+body.admin-page .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+}
+
+body.admin-page .stat-card.active {
+    border-color: #60a5fa;
+    box-shadow: 0 12px 26px rgba(96, 165, 250, 0.2);
+}
+
+body.admin-page .action-link {
+    text-decoration: none;
+    padding: 0.65rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.admin-page .action-link.primary {
+    color: #0f1419;
+    background: #f1f5f9;
+    border-color: #f1f5f9;
+}
+
+body.admin-page .application-card {
+    background: #1a2332;
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+}
+
+body.admin-page .recommendation-panel {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+}
+
+body.admin-page .recommendation-title {
+    color: #f1f5f9;
+}
+
+body.admin-page .recommendation-strong {
+    border-color: rgba(74, 222, 128, 0.35);
+    background: rgba(74, 222, 128, 0.08);
+}
+
+body.admin-page .recommendation-good {
+    border-color: rgba(96, 165, 250, 0.35);
+    background: rgba(96, 165, 250, 0.08);
+}
+
+body.admin-page .recommendation-risk {
+    border-color: rgba(248, 113, 113, 0.35);
+    background: rgba(248, 113, 113, 0.08);
 }
 
 body.auth-page {

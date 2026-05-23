@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.HashMap" %>
@@ -62,62 +62,6 @@
             box-sizing: border-box;
         }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f9fafb;
-            min-height: 100vh;
-        }
-        
-        .header {
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 1rem 0;
-        }
-        
-        .header-content {
-            max-width: 80rem;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header-title h1 {
-            font-size: 1.5rem;
-            color: #111827;
-            margin-bottom: 0.25rem;
-        }
-        
-        .header-title p {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-        
-        .header-nav {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        
-        .btn {
-            padding: 0.5rem 1rem;
-            background: white;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            color: #374151;
-            font-size: 0.875rem;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .btn:hover {
-            background: #f9fafb;
-        }
-        
         .container {
             max-width: 80rem;
             margin: 0 auto;
@@ -125,9 +69,7 @@
         }
         
         .card {
-            background: white;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
@@ -137,35 +79,24 @@
             border-collapse: collapse;
         }
         
-        thead {
-            background: #f9fafb;
-        }
-        
         th {
             text-align: left;
             padding: 0.75rem 1rem;
             font-size: 0.875rem;
             font-weight: 600;
-            color: #374151;
-            border-bottom: 2px solid #e5e7eb;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
         }
         
         td {
             padding: 1rem;
             font-size: 0.875rem;
-            color: #4b5563;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        tr:hover {
-            background: #f9fafb;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
         
         .workload-bar {
             width: 100%;
             max-width: 200px;
             height: 0.5rem;
-            background: #e5e7eb;
             border-radius: 9999px;
             overflow: hidden;
         }
@@ -207,20 +138,25 @@
             color: #991b1b;
         }
     </style>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=11">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=7">
 </head>
-<body>
+<body class="admin-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
                 <h1>TA Workload Overview</h1>
-                <p>Welcome, <%= userName %></p>
+                <p><%= userName %></p>
             </div>
-            <div class="header-nav">
-                <a href="<%= request.getContextPath() %>/admin-dashboard.jsp" class="btn">← Dashboard</a>
-                <a href="<%= request.getContextPath() %>/logout" class="btn">🚪 Logout</a>
-            </div>
+            <a href="<%= request.getContextPath() %>/logout" class="btn-logout">
+                <span>🚪</span> Logout
+            </a>
         </div>
     </header>
+
+    <jsp:include page="includes/admin-nav.jsp">
+        <jsp:param name="active" value="workload" />
+    </jsp:include>
 
     <div class="container">
         <div class="card">
