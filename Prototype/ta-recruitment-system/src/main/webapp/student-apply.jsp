@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Properties" %>
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
@@ -12,6 +13,13 @@
     }
 
     DataFileUtil.initDataDir(application.getRealPath("/"));
+
+    // 从文件读取简历
+    Properties resume = DataFileUtil.loadResume(userEmail);
+    String userSkills = resume.getProperty("technicalSkills", "") +
+                        (resume.getProperty("languageSkills","").isEmpty() ? "" : "," + resume.getProperty("languageSkills",""));
+    String userExperience = resume.getProperty("teachingExp", "");
+    boolean profileIncomplete = resume.isEmpty();
 
     List<String> applications = DataFileUtil.readLines("applications.txt");
     boolean alreadyApplied = false;
@@ -43,12 +51,6 @@
     String skills = "";
     String hoursPerWeek = "";
     String duration = "";
-
-    String userSkills = (String) session.getAttribute("userSkills");
-    String userExperience = (String) session.getAttribute("userExperience");
-    if (userSkills == null) userSkills = "";
-    if (userExperience == null) userExperience = "";
-    boolean profileIncomplete = userSkills.trim().isEmpty() && userExperience.trim().isEmpty();
 
     for (String line : jobs) {
         String[] parts = line.split("\\|");

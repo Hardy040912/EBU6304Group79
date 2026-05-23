@@ -167,6 +167,20 @@
             margin-bottom: 1rem;
             text-align: center;
         }
+        .btn-toggle {
+            padding: 0.3rem 0.7rem;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            margin-top: 0.75rem;
+            margin-right: 0.4rem;
+        }
+        .btn-toggle:hover { background: #e2e8f0; }
+        .collapsible { display: none; margin-top: 0.5rem; }
+        .collapsible.open { display: block; }
     </style>
 </head>
 <body>
@@ -237,11 +251,13 @@
                             String coverOnly = ApplicationPayload.coverLetter(coverLetter);
                         %>
                         <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css">
-                        <div class="review-panel" style="margin-top:0.75rem;">
+                        <button class="btn-toggle" onclick="togglePanel('profile_<%= appId %>')">📄 View Profile</button>
+                        <button class="btn-toggle" onclick="togglePanel('cover_<%= appId %>')">✉️ View Cover Letter</button>
+                        <div id="profile_<%= appId %>" class="collapsible review-panel">
                             <div class="review-panel-title">Profile submitted</div>
                             <div class="review-panel-body"><%= ApplicationPayload.htmlWithBreaks(profileSnap.isEmpty() ? "(legacy application)" : profileSnap) %></div>
                         </div>
-                        <div class="review-panel" style="margin-top:0.5rem;">
+                        <div id="cover_<%= appId %>" class="collapsible review-panel" style="margin-top:0.5rem;">
                             <div class="review-panel-title">Cover letter for this job</div>
                             <div class="review-panel-body"><%= ApplicationPayload.htmlWithBreaks(coverOnly) %></div>
                         </div>
@@ -264,5 +280,10 @@
             %>
         </div>
     </div>
+    <script>
+        function togglePanel(id) {
+            document.getElementById(id).classList.toggle('open');
+        }
+    </script>
 </body>
 </html>
