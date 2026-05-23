@@ -10,7 +10,9 @@
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
-    if (userEmail == null || !"module-organiser".equals(session.getAttribute("userRole"))) {
+    String userRole = (String) session.getAttribute("userRole");
+    boolean isAdmin = "admin".equals(userRole);
+    if (userEmail == null || (!"module-organiser".equals(userRole) && !isAdmin)) {
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
@@ -23,7 +25,7 @@
     Map<String, String[]> myJobs = new HashMap<>();
     for (String line : jobs) {
         String[] parts = line.split("\\|");
-        if (parts.length >= 11 && parts[5].equals(userEmail)) {
+        if (parts.length >= 11 && (isAdmin || parts[5].equals(userEmail))) {
             myJobs.put(parts[0], parts);
         }
     }
@@ -34,8 +36,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Applications - TA Recruitment System</title>
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=10">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=5">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=11">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=7">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -141,11 +143,11 @@
         .match-score { color: #2563eb; font-weight: 700; }
     </style>
 </head>
-<body class="app-page">
+<body class="mo-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
-                <h1>Applications</h1>
+                <h1><%= isAdmin ? "All Applications" : "Applications" %></h1>
                 <p>Welcome, <%= userName %></p>
             </div>
             <div class="header-nav">
@@ -164,7 +166,7 @@
         <% } %>
         
         <div class="card">
-            <h2 class="mo-page-title">Applications for My Jobs</h2>
+            <h2 class="mo-page-title"><%= isAdmin ? "Applications for All Jobs" : "Applications for My Jobs" %></h2>
 
             <%
                 List<String> applications = DataFileUtil.readLines("applications.txt");
@@ -190,6 +192,11 @@
             %>
             <div class="job-section">
                 <h3 class="mo-job-heading"><%= jobTitle %> (<%= moduleCode %>)</h3>
+                <% if (isAdmin) { %>
+                <p style="font-size:0.875rem;color:#6b7280;margin-bottom:1rem;">
+                    Posted by <%= jobInfo[4] %> (<%= jobInfo[5] %>)
+                </p>
+                <% } %>
 
                 <%
                     for (String[] app : jobApplications) {
@@ -299,7 +306,7 @@
                 if (!hasApplications) {
             %>
             <p style="color: #6b7280; text-align: center; padding: 2rem;">
-                No applications received yet for your posted jobs.
+                <%= isAdmin ? "No applications have been submitted yet." : "No applications received yet for your posted jobs." %>
             </p>
             <%
                 }

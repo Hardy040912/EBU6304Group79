@@ -5,7 +5,9 @@
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
-    if (userEmail == null || !"module-organiser".equals(session.getAttribute("userRole"))) {
+    String userRole = (String) session.getAttribute("userRole");
+    boolean isAdmin = "admin".equals(userRole);
+    if (userEmail == null || (!"module-organiser".equals(userRole) && !isAdmin)) {
         response.sendRedirect(request.getContextPath() + "/index.jsp");
         return;
     }
@@ -23,7 +25,7 @@
 
     for (String line : jobs) {
         String[] parts = line.split("\\|");
-        if (parts.length >= 11 && parts[5].equals(userEmail) && "open".equals(parts[10])) {
+        if (parts.length >= 11 && (isAdmin || parts[5].equals(userEmail)) && "open".equals(parts[10])) {
             activeJobs++;
         }
     }
@@ -32,10 +34,10 @@
         String[] parts = line.split("\\|");
         if (parts.length >= 7) {
             String jobId = parts[1];
-            // 检查是否是该 MO 的岗位
+            // Admin sees all jobs; MO sees only their own jobs.
             for (String jobLine : jobs) {
                 String[] jobParts = jobLine.split("\\|");
-                if (jobParts.length >= 11 && jobParts[0].equals(jobId) && jobParts[5].equals(userEmail)) {
+                if (jobParts.length >= 11 && jobParts[0].equals(jobId) && (isAdmin || jobParts[5].equals(userEmail))) {
                     if ("pending".equals(parts[5])) {
                         pendingApps++;
                     } else if ("accepted".equals(parts[5])) {
@@ -53,8 +55,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Module Organiser Dashboard - TA Recruitment System</title>
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=10">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=6">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=11">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=7">
     <style>
         * {
             margin: 0;
@@ -345,11 +347,11 @@
         .resume-section strong { color: #111827; }
     </style>
 </head>
-<body class="app-page">
+<body class="mo-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
-                <h1>Module Organiser Dashboard</h1>
+                <h1><%= isAdmin ? "Recruitment Management" : "Module Organiser Dashboard" %></h1>
                 <p><%= userName %></p>
             </div>
             <a href="<%= request.getContextPath() %>/logout" class="btn-logout">
@@ -367,7 +369,7 @@
         <div class="stats-grid">
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Active Job Posts</span>
+                    <span class="card-title"><%= isAdmin ? "All Active Job Posts" : "Active Job Posts" %></span>
                     <span class="card-icon">💼</span>
                 </div>
                 <div class="card-value"><%= activeJobs %></div>
@@ -376,7 +378,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Pending Applications</span>
+                    <span class="card-title"><%= isAdmin ? "All Pending Applications" : "Pending Applications" %></span>
                     <span class="card-icon">👥</span>
                 </div>
                 <div class="card-value"><%= pendingApps %></div>
@@ -385,7 +387,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Accepted TAs</span>
+                    <span class="card-title"><%= isAdmin ? "All Accepted TAs" : "Accepted TAs" %></span>
                     <span class="card-icon">✓</span>
                 </div>
                 <div class="card-value"><%= acceptedTAs %></div>
@@ -396,7 +398,7 @@
         <!-- Tabs -->
         <div class="tabs">
             <div class="tab-list">
-                <button class="tab-button active" onclick="switchTab('jobs')">My Job Posts</button>
+                <button class="tab-button active" onclick="switchTab('jobs')"><%= isAdmin ? "All Job Posts" : "My Job Posts" %></button>
                 <button class="tab-button" onclick="switchTab('applications')">Applications</button>
             </div>
 
@@ -407,14 +409,14 @@
                 </a>
 
                 <div class="card">
-                    <h2 class="mo-tab-section-title">My Job Posts</h2>
+                    <h2 class="mo-tab-section-title"><%= isAdmin ? "All Job Posts" : "My Job Posts" %></h2>
                     <%
                         List<String> myJobs = DataFileUtil.readLines("jobs.txt");
                         boolean hasJobs = false;
 
                         for (String line : myJobs) {
                             String[] parts = line.split("\\|");
-                            if (parts.length >= 11 && parts[5].equals(userEmail)) {
+                            if (parts.length >= 11 && (isAdmin || parts[5].equals(userEmail))) {
                                 hasJobs = true;
                                 String jobId = parts[0];
                                 String title = parts[1];
@@ -447,6 +449,9 @@
                             <div>
                                 <h3 class="mo-job-card-title"><%= title %></h3>
                                 <p class="mo-job-card-module"><%= moduleCode %> - <%= moduleName %></p>
+                                <% if (isAdmin) { %>
+                                <p class="mo-job-card-module">Posted by <%= parts[4] %> (<%= parts[5] %>)</p>
+                                <% } %>
                             </div>
                             <span class="badge-status <%= statusBadge %>"><%= statusText %></span>
                         </div>
@@ -476,7 +481,7 @@
                         if (!hasJobs) {
                     %>
                     <p style="color: #6b7280; text-align: center; padding: 2rem;">
-                        You haven't posted any jobs yet. Click "Create New Job Post" to get started.
+                        <%= isAdmin ? "No jobs have been posted yet." : "You haven't posted any jobs yet. Click \"Create New Job Post\" to get started." %>
                     </p>
                     <%
                         }
@@ -497,7 +502,7 @@
 
                         for (String line : myJobs) {
                             String[] parts = line.split("\\|");
-                            if (parts.length >= 11 && parts[5].equals(userEmail)) {
+                            if (parts.length >= 11 && (isAdmin || parts[5].equals(userEmail))) {
                                 String jobId = parts[0];
                                 String jobTitle = parts[1];
                                 String moduleCode = parts[2];
@@ -605,7 +610,7 @@
                         if (!hasAnyApplications) {
                     %>
                     <p style="color: #6b7280; text-align: center; padding: 2rem;">
-                        No applications received yet for your posted jobs.
+                        <%= isAdmin ? "No applications have been submitted yet." : "No applications received yet for your posted jobs." %>
                     </p>
                     <%
                         }

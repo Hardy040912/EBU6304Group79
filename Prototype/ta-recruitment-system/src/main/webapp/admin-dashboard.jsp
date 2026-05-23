@@ -1,6 +1,8 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
+<%@ page import="cn.bupt.ta.util.SkillMatcher" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Properties" %>
 <%@ page import="java.util.HashSet" %>
 <%@ page import="java.util.Set" %>
 <%
@@ -167,7 +169,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
         
         .card {
@@ -175,6 +177,29 @@
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             padding: 1.5rem;
+        }
+
+        .stat-card {
+            min-height: 128px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            text-align: left;
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.10);
+        }
+
+        .stat-card.active {
+            border-color: #2563eb;
+            box-shadow: 0 12px 26px rgba(37, 99, 235, 0.16);
+        }
+
+        .stat-card:focus {
+            outline: 3px solid rgba(37, 99, 235, 0.25);
+            outline-offset: 3px;
         }
         
         .card-header {
@@ -209,30 +234,6 @@
         
         .tabs {
             margin-bottom: 1rem;
-        }
-        
-        .tab-list {
-            display: flex;
-            gap: 0.5rem;
-            border-bottom: 1px solid #e5e7eb;
-            margin-bottom: 1.5rem;
-        }
-        
-        .tab-button {
-            padding: 0.75rem 1rem;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            color: #6b7280;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        
-        .tab-button.active {
-            color: #2563eb;
-            border-bottom-color: #2563eb;
         }
         
         .tab-content {
@@ -369,14 +370,101 @@
             background: #fef3c7;
             color: #92400e;
         }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-link {
+            text-decoration: none;
+            padding: 0.65rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            background: white;
+        }
+
+        .action-link.primary {
+            color: white;
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .application-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .btn-mini {
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.45rem 0.75rem;
+        }
+
+        .btn-accept {
+            background: #16a34a;
+        }
+
+        .btn-reject {
+            background: #dc2626;
+        }
+
+        .recommendation-panel {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin: 0.75rem 0;
+            font-size: 0.875rem;
+            color: #475569;
+        }
+
+        .recommendation-title {
+            color: #111827;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+
+        .recommendation-strong {
+            border-color: #86efac;
+            background: #f0fdf4;
+        }
+
+        .recommendation-good {
+            border-color: #bfdbfe;
+            background: #eff6ff;
+        }
+
+        .recommendation-risk {
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
     </style>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=11">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=7">
 </head>
-<body>
+<body class="admin-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
                 <h1>Administrator Dashboard</h1>
-                <p>BUPT International School TA System</p>
+                <p><%= userName %></p>
             </div>
             <a href="<%= request.getContextPath() %>/logout" class="btn-logout">
                 <span>🚪</span> Logout
@@ -384,20 +472,24 @@
         </div>
     </header>
 
+    <jsp:include page="includes/admin-nav.jsp">
+        <jsp:param name="active" value="home" />
+    </jsp:include>
+
     <div class="container">
         <!-- Alert -->
         <% if (criticalAlerts > 0) { %>
         <div class="alert">
             <span class="alert-icon">⚠️</span>
             <div class="alert-content">
-                <strong><%= criticalAlerts %> workload alert<%= criticalAlerts > 1 ? "s" : "" %></strong> requiring attention. Check the workload balancing tab for details.
+                <strong><%= criticalAlerts %> workload alert<%= criticalAlerts > 1 ? "s" : "" %></strong> requiring attention. Click the Critical Alerts card for details.
             </div>
         </div>
         <% } %>
 
         <!-- Stats Cards -->
         <div class="stats-grid">
-            <div class="card">
+            <div class="card stat-card active" data-tab="students" onclick="switchTab('students', this)" tabindex="0" onkeydown="openCardFromKeyboard(event, 'students', this)">
                 <div class="card-header">
                     <span class="card-title">Total Students</span>
                     <span class="card-icon">👥</span>
@@ -406,7 +498,7 @@
                 <p class="card-description">Registered TAs</p>
             </div>
 
-            <div class="card">
+            <div class="card stat-card" data-tab="recruitment" onclick="switchTab('recruitment', this)" tabindex="0" onkeydown="openCardFromKeyboard(event, 'recruitment', this)">
                 <div class="card-header">
                     <span class="card-title">Active Jobs</span>
                     <span class="card-icon">💼</span>
@@ -415,7 +507,7 @@
                 <p class="card-description">Open positions</p>
             </div>
 
-            <div class="card">
+            <div class="card stat-card" data-tab="applications" onclick="switchTab('applications', this)" tabindex="0" onkeydown="openCardFromKeyboard(event, 'applications', this)">
                 <div class="card-header">
                     <span class="card-title">Applications</span>
                     <span class="card-icon">📈</span>
@@ -424,7 +516,7 @@
                 <p class="card-description">Total submitted</p>
             </div>
 
-            <div class="card">
+            <div class="card stat-card" data-tab="workload" onclick="switchTab('workload', this)" tabindex="0" onkeydown="openCardFromKeyboard(event, 'workload', this)">
                 <div class="card-header">
                     <span class="card-title">Critical Alerts</span>
                     <span class="card-icon">⚠️</span>
@@ -436,14 +528,8 @@
 
         <!-- Tabs -->
         <div class="tabs">
-            <div class="tab-list">
-                <button class="tab-button active" onclick="switchTab('overview')">System Overview</button>
-                <button class="tab-button" onclick="switchTab('workload')">Workload Balancing</button>
-                <button class="tab-button" onclick="switchTab('students')">Student Management</button>
-            </div>
-
             <!-- Overview Tab -->
-            <div id="overview" class="tab-content active">
+            <div id="overview" class="tab-content">
                 <div class="chart-container">
                     <h2 class="chart-title">Student Workload Distribution</h2>
                     <div class="bar-chart">
@@ -571,6 +657,190 @@
                 </div>
             </div>
 
+            <!-- Recruitment Management Tab -->
+            <div id="recruitment" class="tab-content">
+                <div class="card">
+                    <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Recruitment Controls</h2>
+                    <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1.25rem;">
+                        Administrators can perform Module Organiser actions across the whole school, including posting jobs and reviewing applications for any module.
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem;">
+                        <a href="<%= request.getContextPath() %>/mo-post-job.jsp" style="text-decoration: none; padding: 0.65rem 1rem; background: #2563eb; border-radius: 6px; color: white; font-size: 0.875rem; font-weight: 500;">
+                            Post New Job
+                        </a>
+                        <a href="<%= request.getContextPath() %>/mo-dashboard.jsp" style="text-decoration: none; padding: 0.65rem 1rem; background: white; border: 1px solid #d1d5db; border-radius: 6px; color: #374151; font-size: 0.875rem; font-weight: 500;">
+                            View All Job Posts
+                        </a>
+                        <a href="<%= request.getContextPath() %>/mo-applications.jsp" style="text-decoration: none; padding: 0.65rem 1rem; background: white; border: 1px solid #d1d5db; border-radius: 6px; color: #374151; font-size: 0.875rem; font-weight: 500;">
+                            Review All Applications
+                        </a>
+                    </div>
+
+                    <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Open Jobs by Organiser</h3>
+                    <div class="student-list">
+                        <%
+                            boolean hasRecruitmentJobs = false;
+                            for (String jobLine : jobs) {
+                                String[] jobParts = jobLine.split("\\|");
+                                if (jobParts.length >= 11) {
+                                    hasRecruitmentJobs = true;
+                        %>
+                        <div class="student-card">
+                            <div class="student-header">
+                                <div>
+                                    <div class="student-name"><%= jobParts[1] %></div>
+                                    <div class="student-email"><%= jobParts[2] %> - <%= jobParts[3] %></div>
+                                    <div class="student-email">Posted by <%= jobParts[4] %> (<%= jobParts[5] %>)</div>
+                                </div>
+                                <span class="badge"><%= jobParts[10] %></span>
+                            </div>
+                            <div class="workload-info">
+                                <%= jobParts[8] %>h/week for <%= jobParts[9] %> | Skills: <%= jobParts[7] %>
+                            </div>
+                        </div>
+                        <%
+                                }
+                            }
+                            if (!hasRecruitmentJobs) {
+                        %>
+                        <p style="color: #6b7280; text-align: center; padding: 2rem;">No job posts have been created yet.</p>
+                        <%
+                            }
+                        %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applications Tab -->
+            <div id="applications" class="tab-content">
+                <div class="card">
+                    <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Applications</h2>
+                    <div class="action-row">
+                        <a href="<%= request.getContextPath() %>/mo-applications.jsp" class="action-link primary">Open Full Review Page</a>
+                    </div>
+                    <div class="student-list">
+                        <%
+                            boolean hasApplicationRows = false;
+                            for (String appLine : applications) {
+                                String[] appParts = appLine.split("\\|");
+                                if (appParts.length >= 7) {
+                                    hasApplicationRows = true;
+                                    String appId = appParts[0];
+                                    String jobId = appParts[1];
+                                    String studentEmail = appParts[2];
+                                    String studentName = appParts[3];
+                                    String status = appParts[5];
+                                    String applyDate = appParts[6];
+
+                                    String jobTitle = "Unknown Job";
+                                    String organiser = "Unknown organiser";
+                                    String requiredSkills = "";
+                                    for (String jobLine : jobs) {
+                                        String[] jobParts = jobLine.split("\\|");
+                                        if (jobParts.length >= 11 && jobParts[0].equals(jobId)) {
+                                            jobTitle = jobParts[1] + " (" + jobParts[2] + ")";
+                                            organiser = jobParts[4] + " (" + jobParts[5] + ")";
+                                            requiredSkills = jobParts[7];
+                                            break;
+                                        }
+                                    }
+
+                                    int currentHours = 0;
+                                    for (String acceptedLine : applications) {
+                                        String[] acceptedParts = acceptedLine.split("\\|");
+                                        if (acceptedParts.length >= 7 && acceptedParts[2].equals(studentEmail) && "accepted".equals(acceptedParts[5])) {
+                                            for (String workloadJobLine : jobs) {
+                                                String[] workloadJobParts = workloadJobLine.split("\\|");
+                                                if (workloadJobParts.length >= 11 && workloadJobParts[0].equals(acceptedParts[1])) {
+                                                    try {
+                                                        currentHours += Integer.parseInt(workloadJobParts[8].trim());
+                                                    } catch (NumberFormatException e) {
+                                                        // Ignore malformed demo data.
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Properties resumeData = DataFileUtil.loadResume(studentEmail);
+                                    SkillMatcher.MatchResult match = SkillMatcher.match(requiredSkills, resumeData);
+                                    String recommendationClass = "recommendation-panel";
+                                    String recommendationTitle = "Review manually";
+                                    String recommendationReason = "Moderate signal. Check resume details and module needs.";
+                                    if (currentHours >= 16) {
+                                        recommendationClass += " recommendation-risk";
+                                        recommendationTitle = "Workload risk";
+                                        recommendationReason = "This TA is already close to the 20h/week limit.";
+                                    } else if (match.getScore() >= 80 && currentHours <= 8) {
+                                        recommendationClass += " recommendation-strong";
+                                        recommendationTitle = "Strong recommendation";
+                                        recommendationReason = "High skill match and low current workload.";
+                                    } else if (match.getScore() >= 60 && currentHours <= 12) {
+                                        recommendationClass += " recommendation-good";
+                                        recommendationTitle = "Good candidate";
+                                        recommendationReason = "Useful skill match with manageable workload.";
+                                    }
+
+                                    String statusClass = "badge";
+                                    String statusLabel = status;
+                                    if ("pending".equals(status)) {
+                                        statusClass = "alert-badge alert-warning";
+                                        statusLabel = "Pending";
+                                    } else if ("accepted".equals(status)) {
+                                        statusClass = "alert-badge alert-success";
+                                        statusLabel = "Accepted";
+                                    } else if ("rejected".equals(status)) {
+                                        statusClass = "alert-badge alert-critical";
+                                        statusLabel = "Rejected";
+                                    }
+                        %>
+                        <div class="application-card">
+                            <div class="student-header">
+                                <div>
+                                    <div class="student-name"><%= studentName %></div>
+                                    <div class="student-email"><%= studentEmail %></div>
+	                                    <div class="student-email"><%= jobTitle %> | <%= organiser %></div>
+	                                    <div class="workload-info">Applied: <%= applyDate %></div>
+	                                </div>
+	                                <span class="<%= statusClass %>"><%= statusLabel %></span>
+	                            </div>
+                            <div class="<%= recommendationClass %>">
+                                <div class="recommendation-title"><%= recommendationTitle %></div>
+                                <div>Skill match: <strong><%= match.getScore() %>%</strong> | Current workload: <strong><%= currentHours %>h/week</strong></div>
+                                <div><%= recommendationReason %></div>
+                                <div>Matched: <%= match.getMatchedSummary() %></div>
+                                <div>Missing: <%= match.getMissingSummary() %></div>
+                            </div>
+	                            <% if ("pending".equals(status)) { %>
+                            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+                                <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post">
+                                    <input type="hidden" name="appId" value="<%= appId %>">
+                                    <input type="hidden" name="status" value="accepted">
+                                    <button type="submit" class="btn-mini btn-accept">Accept</button>
+                                </form>
+                                <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post">
+                                    <input type="hidden" name="appId" value="<%= appId %>">
+                                    <input type="hidden" name="status" value="rejected">
+                                    <input type="hidden" name="blocked" value="false">
+                                    <button type="submit" class="btn-mini btn-reject">Reject</button>
+                                </form>
+                            </div>
+                            <% } %>
+                        </div>
+                        <%
+                                }
+                            }
+                            if (!hasApplicationRows) {
+                        %>
+                        <p style="color: #6b7280; text-align: center; padding: 2rem;">No applications have been submitted yet.</p>
+                        <%
+                            }
+                        %>
+                    </div>
+                </div>
+            </div>
+
             <!-- Workload Balancing Tab -->
             <div id="workload" class="tab-content">
                 <div class="card">
@@ -658,7 +928,7 @@
             </div>
 
             <!-- Student Management Tab -->
-            <div id="students" class="tab-content">
+            <div id="students" class="tab-content active">
                 <div class="card">
                     <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">All Students</h2>
                     <div class="student-list">
@@ -739,15 +1009,33 @@
     </div>
 
     <script>
-        function switchTab(tabName) {
+        function switchTab(tabName, sourceCard) {
             const tabs = document.querySelectorAll('.tab-content');
             tabs.forEach(tab => tab.classList.remove('active'));
             
-            const buttons = document.querySelectorAll('.tab-button');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
+            const cards = document.querySelectorAll('.stat-card');
+            cards.forEach(card => card.classList.remove('active'));
+
+            const target = document.getElementById(tabName);
+            if (target) {
+                target.classList.add('active');
+            }
+
+            if (sourceCard) {
+                sourceCard.classList.add('active');
+            } else {
+                const matchingCard = document.querySelector('.stat-card[data-tab="' + tabName + '"]');
+                if (matchingCard) {
+                    matchingCard.classList.add('active');
+                }
+            }
+        }
+
+        function openCardFromKeyboard(event, tabName, sourceCard) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                switchTab(tabName, sourceCard);
+            }
         }
     </script>
 </body>

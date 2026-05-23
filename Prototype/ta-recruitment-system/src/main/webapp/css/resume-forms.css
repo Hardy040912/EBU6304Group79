@@ -470,6 +470,32 @@ textarea.template-area-lg {
     color: #fff;
 }
 
+body.admin-page .student-nav a {
+    color: #cbd5e1;
+}
+
+body.admin-page .student-nav a:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.admin-page .student-nav a.active {
+    background: #fff;
+    color: #111827;
+}
+
+body.admin-page .mo-tab-button {
+    color: #cbd5e1;
+}
+
+body.admin-page .mo-tab-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.admin-page .mo-tab-button.active {
+    background: #fff;
+    color: #111827;
+}
+
 /* MO applications review */
 .mo-page-title {
     font-family: "Lexend", system-ui, sans-serif;
