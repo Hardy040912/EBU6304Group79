@@ -226,7 +226,17 @@ textarea.template-area-lg {
 }
 
 .cover-section label {
-    font-size: 0.9375rem;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.625rem;
+    letter-spacing: -0.01em;
+}
+
+.cover-section .field-hint,
+.cover-section .field-example {
+    font-size: 0.875rem;
 }
 
 .word-count {
@@ -260,7 +270,7 @@ textarea.template-area-lg {
 /* Apple-style student nav */
 .student-nav {
     max-width: 80rem;
-    margin: 0 auto;
+    margin: 0 auto 1.25rem;
     padding: 0.75rem 2rem 0;
     display: flex;
     gap: 0.5rem;
@@ -378,36 +388,310 @@ textarea.template-area-lg {
 
 .hub-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    margin-top: 1.5rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 960px) {
+    .hub-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .hub-card {
-    display: block;
-    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-align: left;
+    min-height: 15rem;
+    padding: 2.75rem 2.5rem;
     background: white;
     border: 1px solid #e5e7eb;
-    border-radius: 10px;
+    border-radius: 14px;
     text-decoration: none;
     color: inherit;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    transition: border-color 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 8px rgba(15, 20, 25, 0.06);
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 
 .hub-card:hover {
-    border-color: #2563eb;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+    border-color: #7a8fa3;
+    box-shadow: 0 8px 24px rgba(15, 20, 25, 0.1);
+    transform: translateY(-2px);
 }
 
 .hub-card h3 {
-    font-size: 1rem;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.75rem;
+    line-height: 1.3;
+    min-height: 2rem;
+}
+
+.hub-card p {
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.0625rem;
+    color: #6b7280;
+    line-height: 1.55;
+}
+
+/* MO dashboard tabs — match student pill nav */
+.mo-tab-list {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    border-bottom: none;
+}
+
+.mo-tab-button {
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: none;
+    color: #374151;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.mo-tab-button:hover {
+    background: #f3f4f6;
+}
+
+.mo-tab-button.active {
+    background: #111827;
+    color: #fff;
+}
+
+/* MO applications review */
+.mo-page-title {
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.5rem;
+}
+
+.mo-job-heading {
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.mo-applicant-name {
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+
+.mo-applicant-email {
+    font-size: 0.9375rem;
+    color: #6b7280;
+}
+
+.mo-applicant-meta {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    margin-top: 0.25rem;
+}
+
+.btn-accept,
+.btn-reject {
+    padding: 0.625rem 1.125rem;
+    border-radius: 8px;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-accept {
+    background: #eef2ee;
+    color: #5c735f;
+    border-color: #c5d4c7;
+}
+
+.btn-accept:hover {
+    background: #e4ebe5;
+    color: #4a6b52;
+}
+
+.btn-reject {
+    background: #f3eded;
+    color: #8b6666;
+    border-color: #dccaca;
+}
+
+.btn-reject:hover {
+    background: #ebe3e3;
+    color: #7a5555;
+}
+
+.btn-resume {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    margin-top: 0.5rem;
+    background: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-resume:hover {
+    background: #e9edf2;
+    border-color: #b8c0cc;
+}
+
+.btn-resume .ui-icon-document {
+    width: 1.125rem;
+    height: 1.125rem;
+    opacity: 0.85;
+}
+
+.mo-action-buttons,
+.mo-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* MO job posts (dashboard) */
+.mo-job-card,
+.application-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.mo-job-card-header,
+.applicant-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 0.75rem;
+}
+
+.mo-job-card-title {
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.375rem;
+    font-weight: 700;
     color: #111827;
     margin-bottom: 0.35rem;
 }
 
-.hub-card p {
-    font-size: 0.8125rem;
+.mo-job-card-module {
+    font-size: 0.9375rem;
     color: #6b7280;
-    line-height: 1.45;
+}
+
+.mo-job-card-desc {
+    color: #4b5563;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    margin-bottom: 1rem;
+}
+
+.mo-job-card-skills {
+    margin-bottom: 1rem;
+}
+
+.mo-job-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    align-items: center;
+}
+
+.mo-applicant-count {
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.mo-skill-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: #e8edf2;
+    color: #4b5563;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.badge-status {
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-open {
+    background: #eef2ee;
+    color: #5c735f;
+}
+
+.badge-closed {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.mo-btn-create,
+.mo-btn-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.125rem;
+    margin-bottom: 1.5rem;
+    background: #7a8fa3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.mo-btn-create:hover,
+.mo-btn-link:hover {
+    background: #6a7f93;
+    color: #fff;
+}
+
+.mo-tab-section-title {
+    font-family: "Lexend", system-ui, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.25rem;
 }

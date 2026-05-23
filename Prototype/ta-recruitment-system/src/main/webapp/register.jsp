@@ -1,10 +1,11 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - TA Recruitment System</title>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=7">
     <style>
         * {
             margin: 0;
@@ -14,21 +15,12 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f3f4f6;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
         }
         
         .card {
-            background: white;
             border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 28rem;
-            padding: 2rem;
+            /* width from bupt-brand.css?v=2 */
         }
         
         .header {
@@ -138,12 +130,13 @@
         }
     </style>
 </head>
-<body>
+<body class="auth-page">
     <div class="card">
         <div class="header">
             <div class="logo">🎓</div>
-            <h1 class="title">Create Account</h1>
-            <p class="subtitle">Join BUPT TA Recruitment System</p>
+            <h1 class="bupt-school-name" style="font-size: clamp(1.5rem, 3.5vw, 1.875rem);">BUPT International School</h1>
+            <p class="subtitle" style="font-size: 1rem; font-weight: 600; color: #374151; margin-top: 0.5rem;">Create Account</p>
+            <p class="subtitle">Join the TA Recruitment System</p>
         </div>
 
         <% if ("duplicate".equals(request.getParameter("error"))) { %>

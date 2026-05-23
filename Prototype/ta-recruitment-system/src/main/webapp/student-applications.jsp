@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="includes/application-payload.jsp" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.List" %>
@@ -31,6 +31,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Applications - TA Recruitment System</title>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=9">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=4">
     <style>
         * {
             margin: 0;
@@ -169,7 +171,7 @@
         }
     </style>
 </head>
-<body>
+<body class="app-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
@@ -177,11 +179,14 @@
                 <p>Welcome, <%= userName %></p>
             </div>
             <div class="header-nav">
-                <a href="<%= request.getContextPath() %>/student-dashboard.jsp" class="btn">← Dashboard</a>
                 <a href="<%= request.getContextPath() %>/logout" class="btn">🚪 Logout</a>
             </div>
         </div>
     </header>
+
+    <jsp:include page="includes/student-nav.jsp">
+        <jsp:param name="active" value="applications" />
+    </jsp:include>
 
     <div class="container">
         <% if ("1".equals(request.getParameter("success"))) { %>
@@ -211,16 +216,13 @@
                         String moduleName = jobInfo != null ? jobInfo[3] : "";
                         
                         String statusBadge = "badge-pending";
-                        String statusIcon = "⏰";
                         String statusText = "Pending";
                         
                         if ("accepted".equals(status)) {
                             statusBadge = "badge-accepted";
-                            statusIcon = "✓";
                             statusText = "Accepted";
                         } else if ("rejected".equals(status)) {
                             statusBadge = "badge-rejected";
-                            statusIcon = "✗";
                             statusText = "Rejected";
                         }
             %>
@@ -246,7 +248,7 @@
                             <div class="review-panel-body"><%= ApplicationPayload.htmlWithBreaks(coverOnly) %></div>
                         </div>
                     </div>
-                    <span class="badge <%= statusBadge %>"><%= statusIcon %> <%= statusText %></span>
+                    <span class="badge badge-with-icon <%= statusBadge %>"><% if ("Pending".equals(statusText)) { %><span class="ui-icon ui-icon-clock ui-icon-sm" aria-hidden="true"></span><% } else if ("Accepted".equals(statusText)) { %>✓<% } else { %>✗<% } %> <%= statusText %></span>
                 </div>
             </div>
             <%

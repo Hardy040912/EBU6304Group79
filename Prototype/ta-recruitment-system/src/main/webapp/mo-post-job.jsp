@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String userEmail = (String) session.getAttribute("userEmail");
     String userName = (String) session.getAttribute("userName");
@@ -13,6 +13,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post New Job - TA Recruitment System</title>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=10">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=5">
     <style>
         * {
             margin: 0;
@@ -149,7 +151,7 @@
         }
     </style>
 </head>
-<body>
+<body class="app-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
@@ -157,11 +159,14 @@
                 <p>Welcome, <%= userName %></p>
             </div>
             <div class="header-nav">
-                <a href="<%= request.getContextPath() %>/mo-dashboard.jsp" class="btn">← Dashboard</a>
                 <a href="<%= request.getContextPath() %>/logout" class="btn">🚪 Logout</a>
             </div>
         </div>
     </header>
+
+    <jsp:include page="includes/mo-nav.jsp">
+        <jsp:param name="active" value="post" />
+    </jsp:include>
 
     <div class="container">
         <div class="card">

@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="includes/application-payload.jsp" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="cn.bupt.ta.util.SkillMatcher" %>
@@ -34,25 +34,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Applications - TA Recruitment System</title>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=10">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=5">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background-color: #f9fafb;
             min-height: 100vh;
         }
-        
         .header {
             background: white;
             border-bottom: 1px solid #e5e7eb;
             padding: 1rem 0;
         }
-        
         .header-content {
             max-width: 80rem;
             margin: 0 auto;
@@ -61,24 +56,9 @@
             justify-content: space-between;
             align-items: center;
         }
-        
-        .header-title h1 {
-            font-size: 1.5rem;
-            color: #111827;
-            margin-bottom: 0.25rem;
-        }
-        
-        .header-title p {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-        
-        .header-nav {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        
+        .header-title h1 { font-size: 1.5rem; color: #111827; margin-bottom: 0.25rem; }
+        .header-title p { font-size: 0.875rem; color: #6b7280; }
+        .header-nav { display: flex; gap: 1rem; align-items: center; }
         .btn {
             padding: 0.5rem 1rem;
             background: white;
@@ -92,17 +72,8 @@
             align-items: center;
             gap: 0.5rem;
         }
-        
-        .btn:hover {
-            background: #f9fafb;
-        }
-        
-        .container {
-            max-width: 80rem;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
+        .btn:hover { background: #f9fafb; }
+        .container { max-width: 80rem; margin: 0 auto; padding: 2rem; }
         .card {
             background: white;
             border-radius: 8px;
@@ -110,20 +81,7 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
         }
-        
-        .job-section {
-            margin-bottom: 2rem;
-        }
-        
-        .job-section-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
+        .job-section { margin-bottom: 2rem; }
         .application-card {
             background: #f9fafb;
             border: 1px solid #e5e7eb;
@@ -131,25 +89,12 @@
             padding: 1.5rem;
             margin-bottom: 1rem;
         }
-        
         .applicant-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
             margin-bottom: 1rem;
         }
-        
-        .applicant-name {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #111827;
-        }
-        
-        .applicant-email {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-        
         .badge {
             display: inline-block;
             padding: 0.25rem 0.5rem;
@@ -157,65 +102,9 @@
             font-size: 0.75rem;
             font-weight: 500;
         }
-        
-        .badge-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .badge-accepted {
-            background: #dcfce7;
-            color: #166534;
-        }
-        
-        .badge-rejected {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .cover-letter {
-            background: white;
-            padding: 1rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            color: #4b5563;
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .btn-accept {
-            padding: 0.5rem 1rem;
-            background: #16a34a;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            cursor: pointer;
-        }
-        
-        .btn-accept:hover {
-            background: #15803d;
-        }
-        
-        .btn-reject {
-            padding: 0.5rem 1rem;
-            background: #dc2626;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            cursor: pointer;
-        }
-        
-        .btn-reject:hover {
-            background: #b91c1c;
-        }
-        
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-accepted { background: #dcfce7; color: #166534; }
+        .badge-rejected { background: #fee2e2; color: #991b1b; }
         .success-message {
             background: #dcfce7;
             color: #166534;
@@ -224,18 +113,6 @@
             margin-bottom: 1rem;
             text-align: center;
         }
-
-        .btn-resume {
-            padding: 0.4rem 0.8rem;
-            background: #eff6ff;
-            color: #2563eb;
-            border: 1px solid #bfdbfe;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-        .btn-resume:hover { background: #dbeafe; }
-
         .resume-panel {
             display: none;
             background: #f8fafc;
@@ -243,30 +120,28 @@
             border-radius: 6px;
             padding: 1rem 1.25rem;
             margin-top: 0.75rem;
-            font-size: 0.8rem;
+            font-size: 0.875rem;
             color: #374151;
             line-height: 1.8;
         }
         .resume-panel.open { display: block; }
         .resume-section { margin-bottom: 0.75rem; }
         .resume-section strong { color: #111827; }
-
         .match-panel {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
             padding: 0.75rem 1rem;
             margin: 0.75rem 0;
-            font-size: 0.8rem;
+            font-size: 0.875rem;
             color: #475569;
             line-height: 1.5;
         }
-
         .match-panel strong { color: #111827; }
         .match-score { color: #2563eb; font-weight: 700; }
     </style>
 </head>
-<body>
+<body class="app-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
@@ -274,11 +149,14 @@
                 <p>Welcome, <%= userName %></p>
             </div>
             <div class="header-nav">
-                <a href="<%= request.getContextPath() %>/mo-dashboard.jsp" class="btn">← Dashboard</a>
                 <a href="<%= request.getContextPath() %>/logout" class="btn">🚪 Logout</a>
             </div>
         </div>
     </header>
+
+    <jsp:include page="includes/mo-nav.jsp">
+        <jsp:param name="active" value="applications" />
+    </jsp:include>
 
     <div class="container">
         <% if ("1".equals(request.getParameter("success"))) { %>
@@ -286,7 +164,7 @@
         <% } %>
         
         <div class="card">
-            <h2 style="font-size: 1.25rem; margin-bottom: 1.5rem;">Applications for My Jobs</h2>
+            <h2 class="mo-page-title">Applications for My Jobs</h2>
 
             <%
                 List<String> applications = DataFileUtil.readLines("applications.txt");
@@ -311,7 +189,7 @@
                         hasApplications = true;
             %>
             <div class="job-section">
-                <h3 class="job-section-title"><%= jobTitle %> (<%= moduleCode %>)</h3>
+                <h3 class="mo-job-heading"><%= jobTitle %> (<%= moduleCode %>)</h3>
 
                 <%
                     for (String[] app : jobApplications) {
@@ -323,31 +201,27 @@
                         String applyDate = app[6];
 
                         String statusBadge = "badge-pending";
-                        String statusIcon = "⏰";
                         String statusText = "Pending";
 
                         if ("accepted".equals(status)) {
                             statusBadge = "badge-accepted";
-                            statusIcon = "✓";
                             statusText = "Accepted";
                         } else if ("rejected".equals(status)) {
                             statusBadge = "badge-rejected";
-                            statusIcon = "✗";
                             statusText = "Rejected";
                         }
                 %>
                 <div class="application-card">
                     <div class="applicant-header">
                         <div>
-                            <div class="applicant-name"><%= studentName %></div>
-                            <div class="applicant-email"><%= studentEmail %></div>
-                            <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem;">Applied: <%= applyDate %></div>
+                            <div class="mo-applicant-name"><%= studentName %></div>
+                            <div class="mo-applicant-email"><%= studentEmail %></div>
+                            <div class="mo-applicant-meta">Applied: <%= applyDate %></div>
                         </div>
-                        <span class="badge <%= statusBadge %>"><%= statusIcon %> <%= statusText %></span>
+                        <span class="badge badge-with-icon <%= statusBadge %>"><% if ("Pending".equals(statusText)) { %><span class="ui-icon ui-icon-clock ui-icon-sm" aria-hidden="true"></span><% } else if ("Accepted".equals(statusText)) { %>✓<% } else { %>✗<% } %> <%= statusText %></span>
                     </div>
 
                     <% String profileText = ApplicationPayload.profile(coverLetter); String coverOnly = ApplicationPayload.coverLetter(coverLetter); %>
-                    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css">
                     <div class="review-panel" style="margin-bottom:0.75rem;"><div class="review-panel-title">Applicant profile (account CV)</div><div class="review-panel-body"><%= ApplicationPayload.htmlWithBreaks(profileText.isEmpty() ? "No profile snapshot." : profileText) %></div></div>
                     <div class="review-panel"><div class="review-panel-title">Cover letter for this position</div><div class="review-panel-body"><%= ApplicationPayload.htmlWithBreaks(coverOnly) %></div></div>
 
@@ -362,7 +236,7 @@
                         <div><strong>Missing:</strong> <%= match.getMissingSummary() %></div>
                     </div>
                     <% if (hasResume) { %>
-                    <button class="btn-resume" onclick="toggleResume('<%= appId %>')">📄 View Resume</button>
+                    <button type="button" class="btn-resume" onclick="toggleResume('<%= appId %>')"><span class="ui-icon ui-icon-document" aria-hidden="true"></span> View Resume</button>
                     <div id="resume_<%= appId %>" class="resume-panel">
                         <div class="resume-section">
                             <strong>Basic Information</strong><br>
@@ -395,17 +269,17 @@
                     <% } %>
 
                     <% if ("pending".equals(status)) { %>
-                    <div class="action-buttons" style="margin-top: 1rem;">
+                    <div class="mo-action-buttons">
                         <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline;">
                             <input type="hidden" name="appId" value="<%= appId %>">
                             <input type="hidden" name="status" value="accepted">
-                            <button type="submit" class="btn-accept">✓ Accept</button>
+                            <button type="submit" class="btn-accept">Accept</button>
                         </form>
-                        <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline-block; margin-left: 0.5rem;" id="rejectForm_<%= appId %>">
+                        <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline-block;" id="rejectForm_<%= appId %>">
                             <input type="hidden" name="appId" value="<%= appId %>">
                             <input type="hidden" name="status" value="rejected">
                             <input type="hidden" name="blocked" id="blockedInput_<%= appId %>" value="false">
-                            <button type="submit" class="btn-reject">✗ Reject</button>
+                            <button type="submit" class="btn-reject">Reject</button>
                             <label style="display: inline-block; margin-left: 0.5rem; font-size: 0.875rem; color: #4b5563; cursor: pointer;">
                                 <input type="checkbox" id="blockCheckbox_<%= appId %>" onchange="document.getElementById('blockedInput_<%= appId %>').value = this.checked ? 'true' : 'false';" style="margin-right: 0.25rem;">
                                 Block student from reapplying

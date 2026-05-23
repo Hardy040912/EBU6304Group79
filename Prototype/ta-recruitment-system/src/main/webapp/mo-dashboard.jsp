@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Properties" %>
@@ -53,6 +53,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Module Organiser Dashboard - TA Recruitment System</title>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=10">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=6">
     <style>
         * {
             margin: 0;
@@ -167,25 +169,32 @@
         .tab-list {
             display: flex;
             gap: 0.5rem;
-            border-bottom: 1px solid #e5e7eb;
+            flex-wrap: wrap;
             margin-bottom: 1.5rem;
+            border-bottom: none;
         }
         
         .tab-button {
-            padding: 0.75rem 1rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
             background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            color: #6b7280;
-            font-size: 0.875rem;
+            color: #374151;
+            font-family: "Lexend", system-ui, sans-serif;
+            font-size: 0.8125rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: background 0.15s, color 0.15s;
+        }
+        
+        .tab-button:hover {
+            background: #f3f4f6;
         }
         
         .tab-button.active {
-            color: #2563eb;
-            border-bottom-color: #2563eb;
+            background: #111827;
+            color: #fff;
+            border-bottom-color: transparent;
         }
         
         .tab-content {
@@ -285,7 +294,9 @@
         }
         
         .applicant-name {
-            font-weight: 600;
+            font-family: "Lexend", system-ui, sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
             color: #111827;
             margin-bottom: 0.25rem;
         }
@@ -312,48 +323,11 @@
         
         .btn-group {
             display: flex;
+            flex-wrap: wrap;
+            align-items: center;
             gap: 0.5rem;
             margin-top: 0.75rem;
         }
-        
-        .btn-accept {
-            padding: 0.375rem 0.75rem;
-            background: #16a34a;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-        
-        .btn-accept:hover {
-            background: #15803d;
-        }
-        
-        .btn-reject {
-            padding: 0.375rem 0.75rem;
-            background: #dc2626;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-        
-        .btn-reject:hover {
-            background: #b91c1c;
-        }
-
-        .btn-resume {
-            padding: 0.375rem 0.75rem;
-            background: #eff6ff;
-            color: #2563eb;
-            border: 1px solid #bfdbfe;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-        .btn-resume:hover { background: #dbeafe; }
 
         .resume-panel {
             display: none;
@@ -371,7 +345,7 @@
         .resume-section strong { color: #111827; }
     </style>
 </head>
-<body>
+<body class="app-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
@@ -383,6 +357,10 @@
             </a>
         </div>
     </header>
+
+    <jsp:include page="includes/mo-nav.jsp">
+        <jsp:param name="active" value="home" />
+    </jsp:include>
 
     <div class="container">
         <!-- Stats Cards -->
@@ -424,11 +402,12 @@
 
             <!-- My Job Posts Tab -->
             <div id="jobs" class="tab-content active">
-                <a href="<%= request.getContextPath() %>/mo-post-job.jsp" class="btn-create" style="text-decoration: none;">
+                <a href="<%= request.getContextPath() %>/mo-post-job.jsp" class="mo-btn-create">
                     <span>+</span> Create New Job Post
                 </a>
 
                 <div class="card">
+                    <h2 class="mo-tab-section-title">My Job Posts</h2>
                     <%
                         List<String> myJobs = DataFileUtil.readLines("jobs.txt");
                         boolean hasJobs = false;
@@ -463,31 +442,31 @@
                                     statusText = "Closed";
                                 }
                     %>
-                    <div class="job-card">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <div class="mo-job-card">
+                        <div class="mo-job-card-header">
                             <div>
-                                <h3 class="job-title"><%= title %></h3>
-                                <p class="job-subtitle"><%= moduleCode %> - <%= moduleName %></p>
+                                <h3 class="mo-job-card-title"><%= title %></h3>
+                                <p class="mo-job-card-module"><%= moduleCode %> - <%= moduleName %></p>
                             </div>
                             <span class="badge-status <%= statusBadge %>"><%= statusText %></span>
                         </div>
-                        <p style="color: #4b5563; font-size: 0.875rem; margin-bottom: 1rem;">
-                            <%= description %>
-                        </p>
-                        <div style="margin-bottom: 1rem;">
+                        <p class="mo-job-card-desc"><%= description %></p>
+                        <div class="mo-job-card-skills">
                             <%
                                 String[] skillList = skills.split(",");
                                 for (String skill : skillList) {
                             %>
-                            <span class="badge"><%= skill.trim() %></span>
+                            <span class="mo-skill-badge"><%= skill.trim() %></span>
                             <%
                                 }
                             %>
                         </div>
-                        <div style="display: flex; gap: 1.5rem; font-size: 0.875rem; color: #6b7280;">
-                            <span>⏰ <%= hoursPerWeek %>h/week</span>
-                            <span>📅 <%= duration %></span>
-                            <span>📊 <%= applicantCount %> applicant<%= applicantCount != 1 ? "s" : "" %></span>
+                        <div class="mo-job-card-meta">
+                            <jsp:include page="includes/job-meta.jsp">
+                                <jsp:param name="hours" value="<%= hoursPerWeek %>" />
+                                <jsp:param name="duration" value="<%= duration %>" />
+                            </jsp:include>
+                            <span class="mo-applicant-count"><%= applicantCount %> applicant<%= applicantCount != 1 ? "s" : "" %></span>
                         </div>
                     </div>
                     <%
@@ -507,7 +486,7 @@
 
             <!-- Applications Tab -->
             <div id="applications" class="tab-content">
-                <a href="<%= request.getContextPath() %>/mo-applications.jsp" class="btn-create" style="text-decoration: none; margin-bottom: 1rem; display: inline-block;">
+                <a href="<%= request.getContextPath() %>/mo-applications.jsp" class="mo-btn-link" style="margin-bottom: 1rem;">
                     View All Applications
                 </a>
 
@@ -535,7 +514,7 @@
                                 if (!jobApps.isEmpty()) {
                                     hasAnyApplications = true;
                     %>
-                    <h2 style="font-size: 1.25rem; margin-bottom: 1rem; <%= hasAnyApplications && !jobApps.isEmpty() ? "margin-top: 2rem;" : "" %>">
+                    <h2 class="mo-job-heading" style="<%= hasAnyApplications && !jobApps.isEmpty() ? "margin-top: 2rem;" : "" %>">
                         Applications for <%= jobTitle %> (<%= moduleCode %>)
                     </h2>
 
@@ -548,15 +527,15 @@
                                         String status = app[5];
                                         String applyDate = app[6];
                     %>
-                    <div class="applicant-card">
+                    <div class="application-card">
                         <div class="applicant-header">
                             <div>
-                                <div class="applicant-name"><%= studentName %></div>
-                                <div class="applicant-email"><%= studentEmail %></div>
-                                <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem;">Applied: <%= applyDate %></div>
+                                <div class="mo-applicant-name"><%= studentName %></div>
+                                <div class="mo-applicant-email"><%= studentEmail %></div>
+                                <div class="mo-applicant-meta">Applied: <%= applyDate %></div>
                             </div>
                             <% if ("pending".equals(status)) { %>
-                            <span class="badge" style="background: #fef3c7; color: #92400e;">⏰ Pending</span>
+                            <span class="badge badge-with-icon" style="background: #fef3c7; color: #92400e;"><span class="ui-icon ui-icon-clock ui-icon-sm" aria-hidden="true"></span> Pending</span>
                             <% } else if ("accepted".equals(status)) { %>
                             <span class="badge" style="background: #dcfce7; color: #166534;">✓ Accepted</span>
                             <% } else if ("rejected".equals(status)) { %>
@@ -571,7 +550,7 @@
                             boolean hasResume = !resumeData.isEmpty();
                         %>
                         <% if (hasResume) { %>
-                        <button class="btn-resume" onclick="toggleResume('dash_<%= appId %>')">📄 View Resume</button>
+                        <button type="button" class="btn-resume" onclick="toggleResume('dash_<%= appId %>')"><span class="ui-icon ui-icon-document" aria-hidden="true"></span> View Resume</button>
                         <div id="resume_dash_<%= appId %>" class="resume-panel">
                             <div class="resume-section"><strong>Basic Information</strong><br>
                                 Phone: <%= resumeData.getProperty("phone","—") %> &nbsp;|&nbsp;
@@ -598,17 +577,17 @@
                         <span style="font-size:0.75rem;color:#9ca3af;">No resume uploaded</span>
                         <% } %>
                         <% if ("pending".equals(status)) { %>
-                        <div class="btn-group" style="margin-top: 1rem;">
+                        <div class="mo-btn-group">
                             <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline;">
                                 <input type="hidden" name="appId" value="<%= appId %>">
                                 <input type="hidden" name="status" value="accepted">
-                                <button type="submit" class="btn-accept">✓ Accept</button>
+                                <button type="submit" class="btn-accept">Accept</button>
                             </form>
-                            <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline-block; margin-left: 0.5rem;" id="rejectFormDash_<%= appId %>">
+                            <form action="<%= request.getContextPath() %>/updateApplicationStatus" method="post" style="display: inline-block;" id="rejectFormDash_<%= appId %>">
                                 <input type="hidden" name="appId" value="<%= appId %>">
                                 <input type="hidden" name="status" value="rejected">
                                 <input type="hidden" name="blocked" id="blockedInputDash_<%= appId %>" value="false">
-                                <button type="submit" class="btn-reject">✗ Reject</button>
+                                <button type="submit" class="btn-reject">Reject</button>
                                 <label style="display: inline-block; margin-left: 0.5rem; font-size: 0.875rem; color: #4b5563; cursor: pointer;">
                                     <input type="checkbox" id="blockCheckboxDash_<%= appId %>" onchange="document.getElementById('blockedInputDash_<%= appId %>').value = this.checked ? 'true' : 'false';" style="margin-right: 0.25rem;">
                                     Block student from reapplying

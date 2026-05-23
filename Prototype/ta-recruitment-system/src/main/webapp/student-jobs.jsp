@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="cn.bupt.ta.util.SkillMatcher" %>
 <%@ page import="java.util.List" %>
@@ -44,6 +44,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Jobs - TA Recruitment System</title>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=10">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=4">
     <style>
         * {
             margin: 0;
@@ -227,7 +229,7 @@
         }
     </style>
 </head>
-<body>
+<body class="app-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
@@ -235,11 +237,14 @@
                 <p>Welcome, <%= userName %></p>
             </div>
             <div class="header-nav">
-                <a href="<%= request.getContextPath() %>/student-dashboard.jsp" class="btn">← Dashboard</a>
                 <a href="<%= request.getContextPath() %>/logout" class="btn">🚪 Logout</a>
             </div>
         </div>
     </header>
+
+    <jsp:include page="includes/student-nav.jsp">
+        <jsp:param name="active" value="jobs" />
+    </jsp:include>
 
     <div class="container">
         <div class="card">
@@ -284,7 +289,7 @@
                                 <% } else if ("rejected".equals(appliedStatus) && blockedJobs.get(jobId)) { %>
                                     <span style="background: #fee2e2; color: #991b1b; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem;">🚫 Blocked</span>
                                 <% } else { %>
-                                    <span style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem;">⏰ Applied</span>
+                                    <span style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-left: 0.5rem;" class="badge-with-icon"><span class="ui-icon ui-icon-clock ui-icon-sm" aria-hidden="true"></span> Applied</span>
                                 <% } %>
                             <% } %>
                         </h3>
@@ -311,8 +316,10 @@
                     <div class="match-line"><strong>Missing:</strong> <%= match.getMissingSummary() %></div>
                 </div>
                 <div class="job-details">
-                    <span>⏰ <%= hoursPerWeek %>h/week</span>
-                    <span>📅 <%= duration %></span>
+                    <jsp:include page="includes/job-meta.jsp">
+                        <jsp:param name="hours" value="<%= hoursPerWeek %>" />
+                        <jsp:param name="duration" value="<%= duration %>" />
+                    </jsp:include>
                 </div>
                 <% if (hasApplied) { %>
                     <% if ("rejected".equals(appliedStatus) && blockedJobs.get(jobId)) { %>

@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="cn.bupt.ta.util.DataFileUtil" %>
 <%@ page import="cn.bupt.ta.util.SkillMatcher" %>
 <%@ page import="java.util.List" %>
@@ -69,6 +69,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - TA Recruitment System</title>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/bupt-brand.css?v=10">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css?v=4">
     <style>
         * {
             margin: 0;
@@ -331,7 +333,7 @@
         }
     </style>
 </head>
-<body>
+<body class="app-page">
     <header class="header">
         <div class="header-content">
             <div class="header-title">
@@ -343,6 +345,10 @@
             </a>
         </div>
     </header>
+
+    <jsp:include page="includes/student-nav.jsp">
+        <jsp:param name="active" value="home" />
+    </jsp:include>
 
     <div class="container">
         <!-- Stats Cards -->
@@ -395,13 +401,6 @@
             </div>
         </div>
 
-        <link rel="stylesheet" href="<%= request.getContextPath() %>/css/resume-forms.css">
-        <nav class="student-nav" style="padding-left:0;padding-right:0;margin-top:1rem;">
-            <a href="<%= request.getContextPath() %>/student-dashboard.jsp" class="active">Home</a>
-            <a href="<%= request.getContextPath() %>/student-jobs.jsp">Jobs</a>
-            <a href="<%= request.getContextPath() %>/student-profile.jsp">My Profile</a>
-            <a href="<%= request.getContextPath() %>/student-applications.jsp">Applications</a>
-        </nav>
 
         <div class="hub-grid">
             <a href="<%= request.getContextPath() %>/student-jobs.jsp" class="hub-card">
@@ -475,8 +474,10 @@
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
                             <div class="job-details" style="margin: 0;">
-                                <span>⏰ <%= hoursPerWeek %>h/week</span>
-                                <span>📅 <%= duration %></span>
+                                <jsp:include page="includes/job-meta.jsp">
+                                    <jsp:param name="hours" value="<%= hoursPerWeek %>" />
+                                    <jsp:param name="duration" value="<%= duration %>" />
+                                </jsp:include>
                             </div>
                             <a href="<%= request.getContextPath() %>/student-apply.jsp?jobId=<%= jobId %>" class="btn-apply">Apply Now</a>
                         </div>
@@ -512,16 +513,13 @@
                                 String moduleName = jobInfo != null ? jobInfo[3] : "";
 
                                 String statusBadge = "background: #fef3c7; color: #92400e;";
-                                String statusIcon = "⏰";
                                 String statusText = "Pending";
 
                                 if ("accepted".equals(status)) {
                                     statusBadge = "background: #dcfce7; color: #166534;";
-                                    statusIcon = "✓";
                                     statusText = "Accepted";
                                 } else if ("rejected".equals(status)) {
                                     statusBadge = "background: #fee2e2; color: #991b1b;";
-                                    statusIcon = "✗";
                                     statusText = "Rejected";
                                 }
                     %>
@@ -534,7 +532,7 @@
                                     <span>Applied: <%= applyDate %></span>
                                 </div>
                             </div>
-                            <span class="badge" style="<%= statusBadge %>"><%= statusIcon %> <%= statusText %></span>
+                            <span class="badge badge-with-icon" style="<%= statusBadge %>"><% if ("Pending".equals(statusText)) { %><span class="ui-icon ui-icon-clock ui-icon-sm" aria-hidden="true"></span><% } else if ("Accepted".equals(statusText)) { %>✓<% } else { %>✗<% } %> <%= statusText %></span>
                         </div>
                     </div>
                     <%
