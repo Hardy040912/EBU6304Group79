@@ -11,7 +11,7 @@ A Java Servlet/JSP web application for TA recruitment.
 | Chuyuan Su | 221170928 | abcdeme0316 |
 | Yiyang Guo | 231224365 | pptreader101-code |
 | Yizhou Ma | 231224767 | jp2023213572 |
-| Lingran Qin | 221170799 |  |
+| Lingran Qin | 221170799 |  |Mavericks-77
 | Changcheng Huang | 231224918 | HCC-yyds |
 
 ## Tech Stack
